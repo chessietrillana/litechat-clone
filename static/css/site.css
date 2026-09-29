@@ -76,3 +76,135 @@ button, .button {
 .data-table th, .data-table td { padding: 0.5rem 0.75rem; text-align: left; border-bottom: 1px solid #d0d7de; }
 .data-table th { background: #f6f8fa; font-weight: 600; }
 .empty { color: #59636e; }
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Chat layout: header on top, sidebar on the left, chat on the right. */
+body.chat-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+}
+
+.chat-app {
+  flex: 1;
+  display: flex;
+  min-height: 0; /* lets the message list scroll inside the page */
+}
+
+.sidebar {
+  flex: 0 0 16rem;
+  padding: 0.75rem;
+  overflow-y: auto;
+  background: #fff;
+  border-right: 1px solid #d0d7de;
+}
+
+.new-chat {
+  display: block;
+  margin-bottom: 0.75rem;
+  text-align: center;
+  text-decoration: none;
+}
+
+.session-list { margin: 0; padding: 0; list-style: none; }
+
+.session-link {
+  display: block;
+  padding: 0.4rem 0.5rem;
+  overflow: hidden;
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  border-radius: 4px;
+}
+.session-link:hover { background: #f6f8fa; }
+.session-link.current { font-weight: 600; background: #ddf4ff; }
+
+.chat-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.chat-main > .messages { margin: 0.75rem 1rem 0; }
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.chat-welcome { display: flex; flex-direction: column; justify-content: center; text-align: center; }
+
+/* The input box sits at the bottom of the chat. */
+.chat-input {
+  padding: 0.75rem 1rem;
+  background: #fff;
+  border-top: 1px solid #d0d7de;
+}
+
+.chat-pickers { display: flex; flex-wrap: wrap; gap: 0 1rem; }
+.chat-pickers .field { flex: 1 1 14rem; margin-bottom: 0.5rem; }
+.chat-pickers select { width: 100%; padding: 0.4rem; font: inherit; border: 1px solid #d0d7de; border-radius: 4px; }
+
+.chat-compose { display: flex; gap: 0.5rem; align-items: flex-end; }
+.chat-compose textarea {
+  flex: 1;
+  padding: 0.5rem;
+  font: inherit;
+  resize: vertical;
+  border: 1px solid #d0d7de;
+  border-radius: 4px;
+}
+
+.chat-error { margin: 0 0 0.5rem; padding: 0.5rem 0.75rem; color: #a40e26; background: #ffebe9; border-radius: 4px; }
+
+/* Narrow screens: the sidebar sits above the chat. */
+@media (max-width: 700px) {
+  body.chat-page { height: auto; }
+  .chat-app { flex-direction: column; }
+  .sidebar { flex: none; max-height: 12rem; border-right: none; border-bottom: 1px solid #d0d7de; }
+  .chat-messages { overflow-y: visible; }
+}
+
+/* Session page */
+.chat-header { padding: 0.75rem 1rem; background: #fff; border-bottom: 1px solid #d0d7de; }
+.chat-title { margin: 0; font-size: 1.125rem; }
+.chat-meta { margin: 0; font-size: 0.875rem; color: #59636e; }
+
+.chat-scroll { display: flex; flex-direction: column-reverse; }
+.chat-thread { display: flex; flex-direction: column; gap: 0.75rem; }
+
+/* Message bubbles: yours on the right, replies on the left. */
+.bubble {
+  max-width: min(42rem, 85%);
+  padding: 0.6rem 0.85rem;
+  border-radius: 12px;
+}
+.bubble-user {
+  align-self: flex-end;
+  color: #fff;
+  background: #0969da;
+  border-bottom-right-radius: 4px;
+}
+.bubble-assistant {
+  align-self: flex-start;
+  background: #fff;
+  border: 1px solid #d0d7de;
+  border-bottom-left-radius: 4px;
+}
+.bubble-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.bubble-note { margin: 0.4rem 0 0; font-size: 0.8rem; color: #9a6700; }
+
+/* Set by static/js/chat.js while a reply is on its way. */
+button:disabled { color: #59636e; background: #eaeef2; border-color: #d0d7de; cursor: wait; }
