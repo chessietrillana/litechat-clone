@@ -17,6 +17,7 @@ There is no streaming. When you click **Send**, the browser posts the form and w
 Still not blocked, even with JavaScript:
 
 - **Sending from two tabs at once.** Both turns are sent. Each tab sends the history it had, so the two replies may not see each other's messages.
+  Both turns are charged, and both can pass the balance check. See [the balance can go below 0](balance-can-go-below-zero.md).
 
 ## Without JavaScript
 
@@ -37,7 +38,8 @@ If the proxy times out or fails, nothing is saved: not your message and not a re
 
 - Why: the history must always go user, reply, user, reply. A saved message with no reply would break the next turn.
 - A failed **first** message makes no chat at all. So there are no empty chats in the sidebar.
-- An empty reply from the model counts as a failure too.
+- An empty reply with **no** usage counts as a failure too.
+- An empty reply that **did** report usage is saved and charged (plan 7). The chat shows it with a note. Later turns leave that whole turn out of the history, so it still goes user, reply, user, reply.
 
 ## Sidebar order
 
