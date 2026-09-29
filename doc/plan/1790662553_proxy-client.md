@@ -192,7 +192,7 @@ On failure it raises one of the errors below. It never returns half a result.
     - `parse_error_message` reads the real 401 body.
   - Commit: `feat: add Google generateContent adapter`
 
-- [ ] **5. `send_chat` entry point**
+- [x] **5. `send_chat` entry point**
   - Files:
     - `proxy/client.py`: `send_chat(...)`. It does these in order:
       1. checks the interface and the history
