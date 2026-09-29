@@ -143,7 +143,8 @@ People never see µc:
   - Check: `makemigrations --check --dry-run` reports no changes.
   - Commit: `feat: add billing accounts and ledger models`
 
-- [ ] **2. Per-tier prices**
+- [x] **2. Per-tier prices**
+  - Also tested: a negative price is refused in the admin.
   - Files:
     - `billing/models.py`: `TierPrice`, with `micro_per_token` and `__str__`, and `price_per_1k_tokens` checked to be ≥ 0.
     - `billing/migrations/0002_tierprice.py` (from `makemigrations`).
