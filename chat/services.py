@@ -21,6 +21,7 @@ BLANK_MESSAGE = 'Type a message first.'
 TOO_LONG = f'Messages can be at most {MAX_MESSAGE_CHARS:,} characters.'
 EMPTY_REPLY = 'The model sent an empty reply. Please try again.'
 NO_PRICE = 'This model has no price set. Please tell the site admin.'
+CHAT_DELETED = 'This chat was deleted.'
 NO_CREDITS = (
     'This billing account has no credits left. '
     'Ask an admin to add credits, or start a new chat with another account.'
@@ -83,6 +84,8 @@ def start_session(user, llm_model, billing_account, text):
 def send_turn(session, text):
     """Send the next message with the full history (study NOTE Q22). Return the reply."""
     check_text(text)
+    if session.is_hidden:
+        raise ChatError(CHAT_DELETED)
     tier_price = check_can_send(session.user, session.llm_model, session.billing_account)
     history = session.history() + [Message(ChatMessage.Role.USER, text)]
     result = _ask(session.llm_model, history)

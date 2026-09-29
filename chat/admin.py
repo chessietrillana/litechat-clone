@@ -4,6 +4,21 @@ from billing.units import format_credits
 from chat.models import ChatMessage, ChatSession
 
 
+class DeletedByUserFilter(admin.SimpleListFilter):
+    title = 'deleted by user'
+    parameter_name = 'deleted'
+
+    def lookups(self, request, model_admin):
+        return [('yes', 'Yes'), ('no', 'No')]
+
+    def queryset(self, request, queryset):
+        if self.value() == 'yes':
+            return queryset.filter(hidden_at__isnull=False)
+        if self.value() == 'no':
+            return queryset.filter(hidden_at__isnull=True)
+        return queryset
+
+
 class ChatMessageInline(admin.TabularInline):
     model = ChatMessage
     fields = [
@@ -31,8 +46,8 @@ class ChatMessageInline(admin.TabularInline):
 @admin.register(ChatSession)
 class ChatSessionAdmin(admin.ModelAdmin):
     """View only. Sessions are made and changed by users in the chat pages."""
-    list_display = ['title', 'user', 'llm_model', 'billing_account', 'created_at', 'updated_at']
-    list_filter = ['llm_model']
+    list_display = ['title', 'user', 'llm_model', 'billing_account', 'created_at', 'updated_at', 'hidden_at']
+    list_filter = ['llm_model', DeletedByUserFilter]
     list_select_related = ['user', 'llm_model', 'billing_account__owner']
     search_fields = ['title', 'user__username']
     inlines = [ChatMessageInline]

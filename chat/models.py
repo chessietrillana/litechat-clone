@@ -22,6 +22,12 @@ def make_title(text):
     return title + '…' if cut else title
 
 
+class ChatSessionQuerySet(models.QuerySet):
+    def visible(self):
+        """Chats the user has not deleted. Every user-facing lookup uses this."""
+        return self.filter(hidden_at__isnull=True)
+
+
 class ChatSession(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='chat_sessions',
@@ -39,12 +45,26 @@ class ChatSession(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     # Set by the chat services on every turn. The sidebar sorts by it.
     updated_at = models.DateTimeField(default=timezone.now)
+    # Set when the user deletes the chat. Delete only hides it (study NOTE Q21):
+    # the chat, its messages, and its charges stay in the database.
+    hidden_at = models.DateTimeField(null=True, blank=True)
+
+    objects = ChatSessionQuerySet.as_manager()
 
     class Meta:
         ordering = ['-updated_at', '-id']
 
     def __str__(self):
         return self.title
+
+    @property
+    def is_hidden(self):
+        return self.hidden_at is not None
+
+    def hide(self):
+        """Hide the chat from its user. Keeps its place (updated_at) and title."""
+        self.hidden_at = timezone.now()
+        self.save(update_fields=['hidden_at'])
 
     def history(self):
         """All messages as proxy Messages, oldest first.

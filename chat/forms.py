@@ -3,6 +3,7 @@ from django import forms
 from billing.models import BillingAccount
 from billing.units import format_credits
 from catalog.models import LLMModel
+from chat.models import ChatSession
 from chat.services import MAX_MESSAGE_CHARS
 
 
@@ -28,6 +29,16 @@ def message_field():
 
 class MessageForm(forms.Form):
     message = message_field()
+
+
+class RenameForm(forms.Form):
+    """A plain form, not a ModelForm: a refused title must not touch the chat
+    shown on the same page."""
+    title = forms.CharField(
+        label='Title',
+        max_length=ChatSession._meta.get_field('title').max_length,
+        error_messages={'required': 'Enter a title.'},
+    )
 
 
 class NewChatForm(forms.Form):

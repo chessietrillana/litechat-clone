@@ -1,0 +1,21 @@
+{% extends "chat/layout.html" %}
+
+{% block title %}Rename chat{% endblock %}
+
+{% block chat %}
+  <div class="chat-panel">
+    <h1>Rename "{{ current_session.title }}"</h1>
+    <form method="post" action="{% url 'chat_rename' current_session.pk %}">
+      {% csrf_token %}
+      <div class="field">
+        {{ form.title.label_tag }}
+        {{ form.title }}
+        {{ form.title.errors }}
+      </div>
+      <div class="form-actions">
+        <button type="submit">Save</button>
+        <a href="{% url 'chat_session' current_session.pk %}">Cancel</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}

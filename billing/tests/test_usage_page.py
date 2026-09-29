@@ -76,6 +76,22 @@ class UsagePageTests(TestCase):
         self.assertContains(response, '<td class="num">15</td>', html=True)
         self.assertLess(content.index('1,000 / 500'), content.index('183 / 12'))
 
+    def test_deleted_chat_is_listed_without_a_link(self):
+        charged_turn(self.session, 183, 12)
+        kept = ChatSession.objects.create(
+            user=self.alice, llm_model=self.claude, billing_account=self.personal, title='Kept chat',
+        )
+        charged_turn(kept, 50, 5)
+        self.session.hide()
+
+        response = self.client.get(URL)
+        self.assertContains(response, '<td>Capitals (deleted)</td>', html=True)
+        self.assertNotContains(response, f'href="/chat/{self.session.pk}/"')
+        self.assertContains(response, '183 / 12')
+        self.assertContains(response, '<td class="num">0.585</td>', html=True)
+        self.assertContains(response, 'Claude Haiku 4.5')
+        self.assertContains(response, f'<a href="/chat/{kept.pk}/">Kept chat</a>', html=True)
+
     def test_hides_grants_and_other_users_charges(self):
         bob = User.objects.create_user('bob', password=PASSWORD)
         team = BillingAccount.objects.create(kind=BillingAccount.Kind.SHARED, name='Study group')
@@ -116,6 +132,17 @@ class UsagePageTests(TestCase):
         one = self.count_queries()
         for _ in range(9):
             charged_turn(self.session, 10, 1)
+        self.assertEqual(self.count_queries(), one)
+
+    def test_query_count_does_not_grow_with_deleted_chats(self):
+        charged_turn(self.session, 10, 1)
+        one = self.count_queries()
+        for n in range(9):
+            chat = ChatSession.objects.create(
+                user=self.alice, llm_model=self.claude, billing_account=self.personal, title=f'chat {n}',
+            )
+            charged_turn(chat, 10, 1)
+            chat.hide()
         self.assertEqual(self.count_queries(), one)
 
     def count_queries(self):
