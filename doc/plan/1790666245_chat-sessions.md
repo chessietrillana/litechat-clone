@@ -133,7 +133,8 @@ Branch: `feat/chat-sessions`. The plan file is committed on this branch, as aske
     - The admin list and a session page load for a superuser. There is no add or delete.
   - Commit: `feat: add chat session and message models`
 
-- [ ] **2. Chat services: start a chat and send a turn**
+- [x] **2. Chat services: start a chat and send a turn**
+  - Also tested: a reply with no usage saves empty token counts; exactly 20,000 characters is allowed.
   - Files:
     - `chat/services.py`:
       - `start_session(user, llm_model, billing_account, text)` returns a new session.
