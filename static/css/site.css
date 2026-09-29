@@ -75,6 +75,13 @@ button, .button {
 .data-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #d0d7de; }
 .data-table th, .data-table td { padding: 0.5rem 0.75rem; text-align: left; border-bottom: 1px solid #d0d7de; }
 .data-table th { background: #f6f8fa; font-weight: 600; }
+.data-table .num { text-align: right; white-space: nowrap; }
+.table-scroll { overflow-x: auto; }
+
+/* Pages with wide tables (Usage) get a wider main column. */
+.wide-page .site-main { max-width: 64rem; }
+
+.pager { display: flex; gap: 1rem; align-items: center; margin-top: 0.75rem; }
 .empty { color: #59636e; }
 
 .visually-hidden {
