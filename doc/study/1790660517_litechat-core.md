@@ -306,3 +306,31 @@ NOTE: Q2: gemini-3.8-flash = Value, claude-haiku-4-5 = Standard, gpt-5.6-luna = 
 NOTE: Q3: Show the models as the providers name them.
 
 NOTE: Q4: Yes, admins can turn models on and off.
+
+NOTE: Q5: Charge per input+output token, priced by model tier.
+
+NOTE: Q6: Placeholder prices per 1K tokens: Value 1, Standard 3, Premium 10 credits; editable in admin.
+
+NOTE: Q7: No markup.
+
+NOTE: Q8: Charge exactly the tokens the proxy reports, including its hidden overhead.
+
+NOTE: Q9: Cached tokens cost the same as normal tokens.
+
+NOTE: Q10: Store the price used on each charge record.
+
+NOTE: Q11: Unit is called "credits".
+
+NOTE: Q12: New users get 1,000 free credits on sign-up.
+
+NOTE: Q13: Only admins can grant credits.
+
+NOTE: Q14-15: Block sending when balance <= 0.
+
+NOTE: Q16: Charge only when the proxy returns usage; no charge on failure/timeout.
+
+NOTE: Q17: Each user gets an auto-created personal account; admins can create shared accounts.
+
+NOTE: Q18: Users can bill to their personal account or any shared account they belong to.
+
+NOTE: Q19: Admins add members to shared accounts; no per-member limits.
