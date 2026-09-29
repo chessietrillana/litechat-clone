@@ -154,7 +154,12 @@ Branch: `feat/chat-sessions`. The plan file is committed on this branch, as aske
     - Blank text and text over 20,000 characters are refused.
   - Commit: `feat: add chat services that send the full history to the proxy`
 
-- [ ] **3. Chat layout, sidebar, and the new chat page**
+- [x] **3. Chat layout, sidebar, and the new chat page**
+  - Also:
+    - The chat templates live in the app, `chat/templates/chat/`, like `catalog`'s.
+    - The messages list moved into `templates/_messages.html`, so both layouts show it.
+    - A bare `/chat/<id>/` page (title and messages as text) was added here, so the new chat redirect has somewhere to go. Step 4 gives it bubbles and the send box.
+    - `POST /` returns 405.
   - Files:
     - `templates/base.html`: add `{% block main %}` around the current main column.
     - `templates/chat/layout.html` (new): sidebar with **New chat** and the session list (current one highlighted), and the chat area.

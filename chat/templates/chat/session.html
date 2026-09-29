@@ -1,0 +1,12 @@
+{% extends "chat/layout.html" %}
+
+{% block title %}{{ current_session.title }}{% endblock %}
+
+{% block chat %}
+  <div class="chat-messages">
+    <h1 class="chat-title">{{ current_session.title }}</h1>
+    {% for m in chat_messages %}
+      <p>{{ m.get_role_display }}: {{ m.content }}</p>
+    {% endfor %}
+  </div>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "chat/layout.html" %}
+
+{% block title %}New chat{% endblock %}
+
+{% block chat %}
+  <div class="chat-messages chat-welcome">
+    <h1>Hello, {{ user.username }}.</h1>
+    <p>Pick a model and a billing account, then type your first message.
+      They can't be changed later. <a href="{% url 'models' %}">About the models</a></p>
+  </div>
+
+  <form method="post" action="{% url 'chat_new' %}" class="chat-input new-chat-form">
+    {% csrf_token %}
+    {% if error %}<p class="chat-error" role="alert">{{ error }}</p>{% endif %}
+    {{ form.non_field_errors }}
+    <div class="chat-pickers">
+      <div class="field">
+        {{ form.llm_model.label_tag }}
+        {{ form.llm_model }}
+        {{ form.llm_model.errors }}
+      </div>
+      <div class="field">
+        {{ form.billing_account.label_tag }}
+        {{ form.billing_account }}
+        {{ form.billing_account.errors }}
+      </div>
+    </div>
+    {{ form.message.errors }}
+    <div class="chat-compose">
+      <label for="{{ form.message.id_for_label }}" class="visually-hidden">Message</label>
+      {{ form.message }}
+      <button type="submit">Send</button>
+    </div>
+  </form>
+{% endblock %}
