@@ -158,7 +158,9 @@ People never see µc:
     - The admin list loads. Changing a price in the list saves it. There is no add button and no delete.
   - Commit: `feat: add per-tier token prices`
 
-- [ ] **3. Personal account and 1,000-credit grant for every user**
+- [x] **3. Personal account and 1,000-credit grant for every user**
+  - Also: the signal skips fixture loading (`raw=True`).
+  - Dev database after `migrate`: both existing users (your admin user and alice) have a personal account with 1,000 credits.
   - Files:
     - `billing/signals.py`: `post_save` on `User` with `created=True`. In one transaction it creates the personal account and a `signup_grant` of `BILLING_SIGNUP_GRANT_CREDITS`.
     - `billing/apps.py`: connect the signal in `ready()`.
