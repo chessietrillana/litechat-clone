@@ -12,7 +12,9 @@ The LLMs come through the proxy at https://proxy.litechat.ai.
   - sign up / log in / log out
   - the proxy client (`send_chat`, not yet used by any page)
   - the model catalog: three models with provider and tier, a Models page, and on/off in the admin
-- Not built yet: chat and billing. The home page only says hello and links to Models.
+  - billing accounts: personal accounts with 1,000 sign-up credits, shared accounts, admin credit grants, per-tier prices
+- Not built yet: chat, charging per turn (metering), and the usage page.
+- The home page says hello, links to Models, and lists your billing accounts with balances.
 
 Planned features are in [TODO.md](../../TODO.md). The full study is in `doc/study/1790660517_litechat-core.md`.
 
@@ -22,6 +24,7 @@ Planned features are in [TODO.md](../../TODO.md). The full study is in `doc/stud
 - [Auth](features/auth.md): sign up, log in, log out, home page.
 - [Proxy client](features/proxy-client.md): `send_chat()` and the `proxy_smoke` live check.
 - [Model catalog](features/model-catalog.md): `LLMModel`, the Models page, turning models on and off.
+- [Billing accounts](features/billing-accounts.md): accounts, credits (stored as micro-credits), ledger, balances, grants, tier prices.
 
 ## Stack
 
@@ -37,7 +40,7 @@ Planned features are in [TODO.md](../../TODO.md). The full study is in `doc/stud
    venv/bin/pip install -r requirements.txt
    ```
 2. Make a `.env` file in the repo root. Copy `.env.example` and fill in the values. `DJANGO_SECRET_KEY` is required. See [Configuration](features/configuration.md).
-3. Set up the database. This also adds the three models to the catalog.
+3. Set up the database. This also adds the three models to the catalog, the tier prices, and a billing account for any existing user.
    ```
    venv/bin/python manage.py migrate
    ```
@@ -45,6 +48,7 @@ Planned features are in [TODO.md](../../TODO.md). The full study is in `doc/stud
    ```
    venv/bin/python manage.py createsuperuser
    ```
+   Every new user, including this one, gets a personal billing account with 1,000 credits.
 5. Start the server:
    ```
    venv/bin/python manage.py runserver
@@ -75,3 +79,4 @@ See [footguns](footguns/):
 - [Proxy requests can hang](footguns/proxy-timeouts.md)
 - [Django logout needs a POST](footguns/django-logout-requires-post.md)
 - [Proxy log lines are not shown yet](footguns/proxy-logs-not-shown.md)
+- [Every user gets a billing account, and users can't be deleted](footguns/every-user-gets-a-billing-account.md)

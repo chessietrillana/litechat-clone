@@ -32,6 +32,15 @@ catalog/                App: the list of LLMs users can pick
   views.py, urls.py     Models page
   templates/catalog/model_list.html
   tests.py
+billing/                App: billing accounts, ledger, tier prices
+  units.py              Credits <-> micro-credits (µc), formatting
+  models.py             BillingAccount, LedgerEntry, TierPrice
+  signals.py            New user -> personal account + sign-up grant
+  forms.py              Admin forms (shared account, grant credits)
+  admin.py              Accounts, grants, tier prices
+  templatetags/billing.py   {{ amount_micro|credits }}
+  migrations/0003_seed_tier_prices.py, 0004_backfill_personal_accounts.py
+  tests/
 templates/              Shared templates
   base.html             Page shell and nav bar
   home.html             Home page
@@ -48,10 +57,11 @@ doc/                    Studies, plans, and this wiki
 | `accounts` | Sign up, log in, log out. No models. Uses Django's built-in `User`. |
 | `proxy` | `send_chat()` sends a chat history to the proxy and returns text and token usage. No models, no URLs. Has the `proxy_smoke` command. See [Proxy client](features/proxy-client.md). |
 | `catalog` | `LLMModel`: the models users can pick, with provider and tier. Admin can turn them on and off. Models page. See [Model catalog](features/model-catalog.md). |
+| `billing` | Personal and shared billing accounts, the credit ledger, balances, sign-up credits, admin grants, per-tier prices. See [Billing accounts](features/billing-accounts.md). |
 
 Django built-in apps: `admin`, `auth`, `contenttypes`, `sessions`, `messages`, `staticfiles`.
 
-Planned apps (from the study): `billing`, `chat`.
+Planned app (from the study): `chat`.
 
 ## Management commands
 
@@ -64,9 +74,13 @@ Planned apps (from the study): `billing`, `chat`.
 | Model | App | What |
 |---|---|---|
 | `LLMModel` | `catalog` | One LLM: display name, provider (= proxy interface), proxy model ID (unique), tier, active flag, timestamps. Default order: tier, then name. |
+| `BillingAccount` | `billing` | `kind` personal or shared, `name` (shared), `owner` (personal, cascades), `members` (shared, many-to-many with User). One personal account per user. |
+| `LedgerEntry` | `billing` | `account` (protected), `amount_micro` (signed µc), `kind` (`signup_grant`, `admin_grant`), `note`, `created_by` (protected), `created_at`. Never changed or deleted. Balance = sum. |
+| `TierPrice` | `billing` | One row per `tier`: `price_per_1k_tokens` (credits, 3 decimals). Seeded 1 / 3 / 10. |
 
 Users are Django's built-in `django.contrib.auth.models.User`.
-We chose not to use a custom user model. Billing data will live in its own models.
+We chose not to use a custom user model. Billing data lives in the `billing` models.
+Every user has a personal `BillingAccount`, whose ledger entries protect the user from deletion.
 
 Database: SQLite at `db.sqlite3` in the repo root. It is git-ignored.
 
@@ -86,7 +100,7 @@ Database: SQLite at `db.sqlite3` in the repo root. It is git-ignored.
 - `templates/base.html`: every page extends this. It has the nav bar and shows Django messages.
   - Visitors see **Log in** and **Sign up** links.
   - Logged-in users see **Models**, their username, and a **Log out** button (a POST form).
-- `templates/home.html`: "Hello, <username>." and a link to the models page.
+- `templates/home.html`: "Hello, <username>.", a link to the models page, and "Your billing accounts" with balances.
 - `catalog/templates/catalog/model_list.html`: the models table, or an empty message.
 - `accounts/templates/registration/login.html`: the login form. Django's `LoginView` finds it by this path.
 - `accounts/templates/accounts/signup.html`: the sign-up form, with password rules shown.

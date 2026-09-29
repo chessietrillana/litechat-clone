@@ -36,6 +36,14 @@ A missing proxy key becomes `""`. The app still starts, and `check` and tests st
 
 Each key works only with its own interface. A wrong key gets a 401. See the study for details.
 
+## Billing settings
+
+| Setting | Value | Meaning |
+|---|---|---|
+| `BILLING_SIGNUP_GRANT_CREDITS` | `1000` | Free credits every new user gets in their personal account (study NOTE Q12). See [Billing accounts](billing-accounts.md). |
+
+Tier prices are not settings. They live in the database and are edited in the admin.
+
 ## How to check the keys load (without printing them)
 
 ```
