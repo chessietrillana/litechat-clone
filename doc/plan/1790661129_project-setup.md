@@ -68,7 +68,7 @@ Branch: `feat/project-setup`, made from `main`.
 
 ## At rendezvous (human does this)
 
-1. Create an admin user: `! venv/bin/python manage.py createsuperuser` (it is interactive, so you run it).
+1. Create an admin user in your own zsh terminal, not inside Claude Code (so the password stays out of the transcript): `cd /Users/chessietrillana/litechat-clone && venv/bin/python manage.py createsuperuser`.
 2. Start the server: `venv/bin/python manage.py runserver`.
 3. Open http://127.0.0.1:8000/admin/ and log in. You should see the Django admin with "Groups" and "Users".
 4. Open http://127.0.0.1:8000/. You should see a yellow Django "Page not found (404)" page that lists `admin/`. That is expected: there is no home page yet. Auth adds one next.
