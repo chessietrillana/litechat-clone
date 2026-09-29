@@ -43,7 +43,7 @@ def parse_response(data):
     usage = data.get('usage') or {}
     return ChatResult(
         text=text,
-        input_tokens=int_or_none(usage.get('input_tokens')),
+        input_tokens=total_input_tokens(usage),
         output_tokens=int_or_none(usage.get('output_tokens')),
         cached_tokens=int_or_none(usage.get('cache_read_input_tokens')),
         finish_reason=FINISH_REASONS.get(raw_finish, FINISH_OTHER),
@@ -51,6 +51,21 @@ def parse_response(data):
         response_id=data.get('id'),
         model=data.get('model'),
     )
+
+
+def total_input_tokens(usage):
+    """All input tokens, cached included, like OpenAI and Google report them.
+
+    Anthropic's input_tokens leaves out cache reads and cache writes. They are
+    billed at the normal input price (study NOTE Q9), so add them back.
+    None when none of the three counts was reported.
+    """
+    counts = [
+        int_or_none(usage.get(name))
+        for name in ('input_tokens', 'cache_read_input_tokens', 'cache_creation_input_tokens')
+    ]
+    reported = [n for n in counts if n is not None]
+    return sum(reported) if reported else None
 
 
 def parse_error_message(data):
