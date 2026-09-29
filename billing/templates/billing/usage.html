@@ -51,7 +51,7 @@
             {% with message=charge.chat_message %}
             <tr>
               <td>{{ charge.created_at|date:"Y-m-d H:i" }}</td>
-              <td>{% if message %}<a href="{% url 'chat_session' message.session.pk %}">{{ message.session.title }}</a>{% else %}—{% endif %}</td>
+              <td>{% if not message %}—{% elif message.session.is_hidden %}{{ message.session.title }} (deleted){% else %}<a href="{% url 'chat_session' message.session.pk %}">{{ message.session.title }}</a>{% endif %}</td>
               <td>{% if message %}{{ message.session.llm_model.display_name }}{% else %}—{% endif %}</td>
               <td>{{ charge.account }}</td>
               <td class="num">{% if message %}{{ message.input_tokens|thousands }} / {{ message.output_tokens|thousands }}{% else %}{{ charge.tokens|thousands }}{% endif %}</td>
