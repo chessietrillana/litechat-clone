@@ -155,3 +155,95 @@ class NewChatTests(TestCase):
         response = self.post()
         self.assertRedirects(response, '/accounts/login/?next=/chat/new/', fetch_redirect_response=False)
         send_chat.assert_not_called()
+
+
+@mock.patch('chat.services.send_chat')
+class SessionPageTests(TestCase):
+    def setUp(self):
+        self.alice = make_user('alice')
+        self.client.force_login(self.alice)
+        self.session = make_session(self.alice, title='Capitals', turns=2)
+        self.url = f'/chat/{self.session.pk}/'
+
+    def test_owner_sees_messages_in_order_as_bubbles(self, send_chat):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        content = response.content.decode()
+        positions = [content.index(t) for t in ['question 1', 'answer 1', 'question 2', 'answer 2']]
+        self.assertEqual(positions, sorted(positions))
+        self.assertEqual(content.count('class="bubble bubble-user"'), 2)
+        self.assertEqual(content.count('class="bubble bubble-assistant"'), 2)
+        self.assertContains(response, 'Gemini 3.8 Flash (Value)')
+        self.assertContains(response, 'billed to alice (personal)')
+
+    def test_other_user_gets_404(self, send_chat):
+        self.client.force_login(make_user('bob'))
+        self.assertEqual(self.client.get(self.url).status_code, 404)
+        self.assertEqual(self.client.post(self.url, {'message': 'Hi'}).status_code, 404)
+        send_chat.assert_not_called()
+
+    def test_anonymous_user_is_redirected_to_login(self, send_chat):
+        self.client.logout()
+        response = self.client.get(self.url)
+        self.assertRedirects(response, f'/accounts/login/?next={self.url}', fetch_redirect_response=False)
+
+    def test_missing_session_is_404(self, send_chat):
+        self.assertEqual(self.client.get('/chat/9999/').status_code, 404)
+
+    def test_send_saves_turn_and_redirects(self, send_chat):
+        send_chat.return_value = reply(text='answer 3')
+        response = self.client.post(self.url, {'message': 'question 3'})
+        self.assertRedirects(response, self.url)
+        self.assertEqual(len(send_chat.call_args.args[2]), 5)
+        self.assertEqual(self.session.messages.count(), 6)
+        self.assertContains(self.client.get(self.url), 'answer 3')
+
+    def test_proxy_failure_shows_error_keeps_text_saves_nothing(self, send_chat):
+        send_chat.side_effect = ProxyTimeout('timed out')
+        response = self.client.post(self.url, {'message': 'question 3'})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'The model took too long to answer. Please try again.')
+        self.assertContains(response, 'question 3</textarea>')
+        self.assertEqual(self.session.messages.count(), 4)
+
+    def test_turned_off_model_shows_message_and_old_messages(self, send_chat):
+        self.session.llm_model.is_active = False
+        self.session.llm_model.save()
+        response = self.client.post(self.url, {'message': 'question 3'})
+        self.assertContains(response, 'This model has been turned off.')
+        self.assertContains(response, 'answer 2')
+        send_chat.assert_not_called()
+
+    def test_blank_message_is_refused(self, send_chat):
+        response = self.client.post(self.url, {'message': '  '})
+        self.assertContains(response, 'Type a message first.')
+        send_chat.assert_not_called()
+
+    def test_cut_off_reply_shows_note(self, send_chat):
+        send_chat.return_value = reply(text='A long answer', finish_reason='length')
+        self.client.post(self.url, {'message': 'question 3'})
+        response = self.client.get(self.url)
+        self.assertContains(response, 'This reply was cut off at the length limit.', count=1)
+
+    def test_html_in_messages_is_shown_as_text(self, send_chat):
+        send_chat.return_value = reply(text='<b>bold</b>')
+        self.client.post(self.url, {'message': '<script>alert(1)</script>'})
+        response = self.client.get(self.url)
+        self.assertContains(response, '&lt;script&gt;alert(1)&lt;/script&gt;')
+        self.assertNotContains(response, '<script>alert(1)</script>')
+        self.assertContains(response, '&lt;b&gt;bold&lt;/b&gt;')
+
+    def test_model_and_account_cannot_be_changed(self, send_chat):
+        response = self.client.get(self.url)
+        self.assertNotContains(response, '<select')
+        send_chat.return_value = reply()
+        other = seeded_model('gpt-5.6-luna')
+        self.client.post(self.url, {'message': 'question 3', 'llm_model': other.pk})
+        self.session.refresh_from_db()
+        self.assertEqual(self.session.llm_model.proxy_model_id, 'gemini-3.8-flash')
+        self.assertEqual(send_chat.call_args.args[1], 'gemini-3.8-flash')
+
+    def test_line_breaks_are_kept(self, send_chat):
+        send_chat.return_value = reply(text='line one\nline two')
+        self.client.post(self.url, {'message': 'question 3'})
+        self.assertContains(self.client.get(self.url), 'line one\nline two')

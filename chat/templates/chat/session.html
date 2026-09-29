@@ -3,10 +3,37 @@
 {% block title %}{{ current_session.title }}{% endblock %}
 
 {% block chat %}
-  <div class="chat-messages">
+  <div class="chat-header">
     <h1 class="chat-title">{{ current_session.title }}</h1>
-    {% for m in chat_messages %}
-      <p>{{ m.get_role_display }}: {{ m.content }}</p>
-    {% endfor %}
+    <p class="chat-meta">
+      {{ current_session.llm_model.display_name }} ({{ current_session.llm_model.get_tier_display }})
+      · billed to {{ current_session.billing_account }}
+    </p>
   </div>
+
+  {# column-reverse on .chat-scroll starts the scroll at the newest message, with no JS. #}
+  <div class="chat-messages chat-scroll">
+    <div class="chat-thread">
+    {% for m in chat_messages %}
+      <div class="bubble bubble-{{ m.role }}">
+        <span class="visually-hidden">{% if m.role == 'user' %}You{% else %}{{ current_session.llm_model.display_name }}{% endif %}:</span>
+        <div class="bubble-text">{{ m.content }}</div>
+        {% if m.was_cut_off %}
+          <p class="bubble-note">This reply was cut off at the length limit.</p>
+        {% endif %}
+      </div>
+    {% endfor %}
+    </div>
+  </div>
+
+  <form method="post" action="{% url 'chat_session' current_session.pk %}" class="chat-input">
+    {% csrf_token %}
+    {% if error %}<p class="chat-error" role="alert">{{ error }}</p>{% endif %}
+    {{ form.message.errors }}
+    <div class="chat-compose">
+      <label for="{{ form.message.id_for_label }}" class="visually-hidden">Message</label>
+      {{ form.message }}
+      <button type="submit">Send</button>
+    </div>
+  </form>
 {% endblock %}

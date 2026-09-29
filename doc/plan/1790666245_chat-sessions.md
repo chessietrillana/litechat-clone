@@ -182,7 +182,11 @@ Branch: `feat/chat-sessions`. The plan file is committed on this branch, as aske
     - `GET /chat/new/` returns 405.
   - Commit: `feat: add chat layout with session sidebar and new chat page`
 
-- [ ] **4. Session page: bubbles and the send box**
+- [x] **4. Session page: bubbles and the send box**
+  - Also:
+    - The message list starts scrolled to the newest message, using CSS only (`flex-direction: column-reverse`).
+    - Each bubble has a hidden "You:" or model-name label for screen readers.
+    - Tested: line breaks are kept, a missing session is 404, and posting a different model with the form changes nothing.
   - Files:
     - `templates/chat/session.html` (new): title, model and account shown at the top, the message bubbles, and the send form at the bottom.
     - `chat/views.py`: `session_detail` (GET shows, POST sends).

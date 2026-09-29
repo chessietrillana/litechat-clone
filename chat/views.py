@@ -1,10 +1,10 @@
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_POST, require_safe
+from django.views.decorators.http import require_http_methods, require_POST, require_safe
 
-from chat.forms import NewChatForm
+from chat.forms import MessageForm, NewChatForm
 from chat.models import ChatSession
-from chat.services import ChatError, start_session
+from chat.services import ChatError, send_turn, start_session
 from proxy.errors import ProxyError
 
 
@@ -46,10 +46,28 @@ def new_chat(request):
 
 
 @login_required
-@require_safe
+@require_http_methods(['GET', 'HEAD', 'POST'])
 def session_detail(request, pk):
-    session = get_object_or_404(ChatSession, pk=pk, user=request.user)
+    """GET shows the session. POST sends the next message."""
+    session = get_object_or_404(
+        ChatSession.objects.select_related('llm_model', 'billing_account__owner'),
+        pk=pk, user=request.user,
+    )
+    error = None
+    if request.method == 'POST':
+        form = MessageForm(request.POST)
+        if form.is_valid():
+            try:
+                send_turn(session, form.cleaned_data['message'])
+            except (ChatError, ProxyError) as e:
+                error = e.user_message
+            else:
+                return redirect('chat_session', session.pk)
+    else:
+        form = MessageForm()
     return render_chat(request, 'chat/session.html', {
         'current_session': session,
         'chat_messages': session.messages.all(),
+        'form': form,
+        'error': error,
     })
