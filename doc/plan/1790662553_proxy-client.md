@@ -246,7 +246,10 @@ On failure it raises one of the errors below. It never returns half a result.
     - A timeout is reported as it is, not hidden. If it happens, run that interface once more by hand and report both results.
   - Commit: `feat: add proxy_smoke management command`
 
-- [ ] **7. Record anything surprising (only if needed)**
+- [x] **7. Record anything surprising (only if needed)**
+  - Done:
+    - `proxy-timeouts.md` now has the live timing results and points to the code and `proxy_smoke`.
+    - New `proxy-logs-not-shown.md`: with no `LOGGING` setting, the `proxy` INFO lines are dropped, and WARNING lines go to stderr through Python's fallback handler.
   - If steps 1–6 or the live check find surprising behavior, record it in `doc/wiki/footguns/`.
   - If nothing is surprising, skip this step and say so.
   - Commit: `docs: record proxy client footguns`
