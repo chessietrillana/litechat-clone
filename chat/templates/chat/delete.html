@@ -1,0 +1,16 @@
+{% extends "chat/layout.html" %}
+
+{% block title %}Delete chat{% endblock %}
+
+{% block chat %}
+  <div class="chat-panel">
+    <h1>Delete "{{ current_session.title }}"?</h1>
+    <p>The chat leaves your list, and it can't be opened again.</p>
+    <p>Its charges stay on the <a href="{% url 'usage' %}">Usage</a> page. Your balance does not change.</p>
+    <form method="post" action="{% url 'chat_delete' current_session.pk %}" class="form-actions">
+      {% csrf_token %}
+      <button type="submit" class="button-danger">Delete</button>
+      <a href="{% url 'chat_session' current_session.pk %}">Cancel</a>
+    </form>
+  </div>
+{% endblock %}

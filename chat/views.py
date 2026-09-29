@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect, render
@@ -17,6 +18,13 @@ def render_chat(request, template, context):
         **context,
     }
     return render(request, template, context)
+
+
+def own_session(request, pk, *related):
+    """The user's own chat, if not deleted. Anything else is Not found, not Forbidden."""
+    return get_object_or_404(
+        ChatSession.objects.visible().select_related(*related), pk=pk, user=request.user,
+    )
 
 
 @login_required
@@ -50,10 +58,7 @@ def new_chat(request):
 @require_http_methods(['GET', 'HEAD', 'POST'])
 def session_detail(request, pk):
     """GET shows the session. POST sends the next message."""
-    session = get_object_or_404(
-        ChatSession.objects.visible().select_related('llm_model', 'billing_account__owner'),
-        pk=pk, user=request.user,
-    )
+    session = own_session(request, pk, 'llm_model', 'billing_account__owner')
     error = None
     if request.method == 'POST':
         form = MessageForm(request.POST)
@@ -81,3 +86,15 @@ def session_detail(request, pk):
         'balance': balance,
         'out_of_credits': out_of_credits,
     })
+
+
+@login_required
+@require_http_methods(['GET', 'HEAD', 'POST'])
+def delete_session(request, pk):
+    """GET asks to confirm. POST hides the chat (study NOTE Q21). Its charges stay."""
+    session = own_session(request, pk)
+    if request.method == 'POST':
+        session.hide()
+        messages.success(request, f'Deleted "{session.title}".')
+        return redirect('home')
+    return render_chat(request, 'chat/delete.html', {'current_session': session})

@@ -14,10 +14,17 @@
       {% if sessions %}
         <ul class="session-list">
           {% for s in sessions %}
-            <li>
+            <li class="session-item">
               <a href="{% url 'chat_session' s.pk %}"
                  class="session-link{% if s.pk == current_session.pk %} current{% endif %}"
                  {% if s.pk == current_session.pk %}aria-current="page"{% endif %}>{{ s.title }}</a>
+              {# <details> opens the menu without JavaScript. #}
+              <details class="session-menu">
+                <summary aria-label="Options for {{ s.title }}" title="Options">⋯</summary>
+                <div class="session-menu-items">
+                  <a href="{% url 'chat_delete' s.pk %}">Delete</a>
+                </div>
+              </details>
             </li>
           {% endfor %}
         </ul>
