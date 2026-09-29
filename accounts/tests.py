@@ -68,3 +68,57 @@ class LoginTests(TestCase):
         response = self.client.get('/accounts/login/')
         self.assertContains(response, 'href="/accounts/login/"')
         self.assertNotContains(response, 'Log out')
+
+
+class SignUpTests(TestCase):
+    def post_signup(self, username='bob', password1=PASSWORD, password2=PASSWORD):
+        return self.client.post(
+            '/accounts/signup/',
+            {'username': username, 'password1': password1, 'password2': password2},
+        )
+
+    def test_signup_page_shows_username_and_two_passwords_only(self):
+        response = self.client.get('/accounts/signup/')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(list(response.context['form'].fields), ['username', 'password1', 'password2'])
+        self.assertNotContains(response, 'name="email"')
+
+    def test_valid_signup_creates_user_logs_in_and_redirects_home(self):
+        response = self.post_signup()
+        self.assertRedirects(response, '/')
+        user = User.objects.get(username='bob')
+        self.assertEqual(int(self.client.session['_auth_user_id']), user.pk)
+
+    def test_new_user_is_not_staff_or_superuser(self):
+        self.post_signup()
+        user = User.objects.get(username='bob')
+        self.assertFalse(user.is_staff)
+        self.assertFalse(user.is_superuser)
+
+    def test_taken_username_is_rejected(self):
+        User.objects.create_user('bob', password=PASSWORD)
+        response = self.post_signup()
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'errorlist')
+        self.assertEqual(User.objects.filter(username='bob').count(), 1)
+
+    def test_mismatched_passwords_are_rejected(self):
+        response = self.post_signup(password2='different-horse-43')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'errorlist')
+        self.assertFalse(User.objects.filter(username='bob').exists())
+
+    def test_weak_password_is_rejected(self):
+        response = self.post_signup(password1='12345678', password2='12345678')
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'errorlist')
+        self.assertFalse(User.objects.filter(username='bob').exists())
+
+    def test_logged_in_user_is_sent_home_from_signup_page(self):
+        self.client.force_login(User.objects.create_user('bob', password=PASSWORD))
+        response = self.client.get('/accounts/signup/')
+        self.assertRedirects(response, '/')
+
+    def test_login_page_links_to_signup(self):
+        response = self.client.get('/accounts/login/')
+        self.assertContains(response, 'href="/accounts/signup/"')
