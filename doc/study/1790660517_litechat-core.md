@@ -278,3 +278,17 @@ Items 6 and 7 can merge if billing is simple. Items 5–7 depend on the billing 
 
 29. Approve installing `Django` 5.2.x and `python-dotenv`?
 30. Please add `DJANGO_SECRET_KEY` to `.env` when we start plan 1. (I will not read or write `.env`.)
+
+## 14. Decisions from the human
+
+NOTE: Key names: the correct env var names are PROXY_OPENAI_API_KEY, PROXY_ANTHROPIC_API_KEY, PROXY_GOOGLE_API_KEY (as in .env and CLAUDE.md). Ignore the names in the first prompt.
+
+NOTE: Q27: Username + password sign-up, no email verification for now.
+
+NOTE: Q29: Approved. Install Django 5.2.x and python-dotenv, pinned in requirements.txt.
+
+NOTE: Q30: Done. DJANGO_SECRET_KEY is now in .env.
+
+NOTE: Section 9: don't name the catalog table "Model". It's confusing next to Django's models.Model. Use a clearer name like LLMModel.
+
+NOTE: Other open questions: the human will answer them before the plans that need them. Start with plans 1 and 2 (project setup, then auth).
