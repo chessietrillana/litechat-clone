@@ -7,7 +7,7 @@
 
 ## Ground rules
 - I (the human) will not write code. You write all code. I will just make strategic decisions (what to build, scope, tradeoffs). You make tactical decisions (how to build it).
-- Never read, cat, open, or print .env or any API key. Refer to keys only by environment variable name (OPENAI_API_KEY, ANTHROPIC_API_KEY, GOOGLE_API_KEY). Never hardcode keys in code, docs, fixtures, or commits. Redact keys from any captured responses or logs.
+- Never read, cat, open, or print .env or any API key. Refer to keys only by environment variable name (PROXY_OPENAI_API_KEY, PROXY_ANTHROPIC_API_KEY, PROXY_GOOGLE_API_KEY). Never hardcode keys in code, docs, fixtures, or commits. Redact keys from any captured responses or logs.
 - Scope each piece of work to fit one Conventional Commit (feat:, fix:, docs:, chore:, build:, refactor:, test:, style:). Tell me (the human) how you scoped it. If the work cannot fit one commit, stop and ask before continuing.
 - After each change, suggest a commit message. You may make the commit.
 - Protect the codebase. Never delete files or folders, reset or drop the database, run git reset --hard, git push --force, git rebase, or delete branches unless the human explicitly asks.
