@@ -36,7 +36,7 @@ Branch: `feat/project-setup`, made from `main`.
   - Note: the generated `settings.py` has a hardcoded `SECRET_KEY`. It is replaced in step 4. It is a throwaway dev value, not a real secret, but step 4 must land before anything is pushed.
   - Commit: `chore: start Django project`
 
-- [ ] **4. Load settings from .env**
+- [x] **4. Load settings from .env**
   - Files: `config/settings.py`, `.env.example` (new).
   - Do:
     - `load_dotenv(BASE_DIR / ".env")` at the top of settings.

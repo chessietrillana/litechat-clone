@@ -10,22 +10,45 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+from django.core.exceptions import ImproperlyConfigured
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load .env from the repo root. Variables already set in the shell win.
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-a^7czww5rh6d*b-srgja0+rdmlxmh@s2ivwy+5**slx_3p^xdn'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', '')
+if not SECRET_KEY:
+    raise ImproperlyConfigured('DJANGO_SECRET_KEY is not set. Add it to .env (see .env.example).')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Defaults to on: this is a local dev app. A deploy plan must change this.
+DEBUG = os.environ.get('DJANGO_DEBUG', '1').lower() in ('1', 'true', 'yes', 'on')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    h.strip()
+    for h in os.environ.get('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+    if h.strip()
+]
+
+
+# LLM proxy. Keys may be empty; code that calls the proxy must check.
+PROXY_BASE_URL = 'https://proxy.litechat.ai'
+PROXY_KEYS = {
+    'openai': os.environ.get('PROXY_OPENAI_API_KEY', ''),
+    'anthropic': os.environ.get('PROXY_ANTHROPIC_API_KEY', ''),
+    'google': os.environ.get('PROXY_GOOGLE_API_KEY', ''),
+}
 
 
 # Application definition
