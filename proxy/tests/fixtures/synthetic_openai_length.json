@@ -1,0 +1,21 @@
+{
+  "_note": "Synthetic. Shape from the proxy docs; finish_reason 'length' was never captured live.",
+  "choices": [
+    {
+      "finish_reason": "length",
+      "index": 0,
+      "message": {
+        "content": "Once upon a time, in a land far",
+        "role": "assistant"
+      }
+    }
+  ],
+  "id": "synthetic-openai-length",
+  "model": "gpt-5.6-luna",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 8,
+    "prompt_tokens": 190,
+    "total_tokens": 198
+  }
+}

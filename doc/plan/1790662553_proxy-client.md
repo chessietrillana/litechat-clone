@@ -117,7 +117,8 @@ On failure it raises one of the errors below. It never returns half a result.
 
 ## Steps
 
-- [ ] **1. Proxy app, types, errors, and HTTP transport**
+- [x] **1. Proxy app, types, errors, and HTTP transport**
+  - Change during execution: an error status (4xx/5xx) with a body that is not JSON, such as an HTML 502 page, returns `(status, None)` instead of raising `ProxyResponseError`. That way `send_chat` still maps it by status (e.g. 502 → `ProxyUpstreamError`). Only a 2xx body that is not JSON raises `ProxyResponseError`.
   - Files:
     - `proxy/` (new app, `venv/bin/python manage.py startapp proxy`). Delete nothing, but leave `models.py`, `admin.py`, and `views.py` empty.
     - Add `"proxy"` to `INSTALLED_APPS`.
@@ -139,7 +140,7 @@ On failure it raises one of the errors below. It never returns half a result.
     - A fake key in the headers never shows up in the text of any raised error.
   - Commit: `feat: add proxy app with HTTP transport and errors`
 
-- [ ] **2. OpenAI Chat Completions adapter**
+- [x] **2. OpenAI Chat Completions adapter**
   - Files: `proxy/adapters/__init__.py`, `proxy/adapters/openai.py`, `proxy/tests/fixtures/openai_single.json`, `openai_multiturn.json` (copied from the study), `synthetic_openai_length.json`, `synthetic_openai_no_usage.json`, `proxy/tests/test_openai.py`.
   - Tests:
     - `build_request`:
@@ -156,7 +157,7 @@ On failure it raises one of the errors below. It never returns half a result.
     - `parse_error_message` reads the real 401 body from the study.
   - Commit: `feat: add OpenAI chat completions adapter`
 
-- [ ] **3. Anthropic Messages adapter**
+- [x] **3. Anthropic Messages adapter**
   - Files: `proxy/adapters/anthropic.py`, `proxy/tests/fixtures/anthropic_single.json`, `anthropic_multiturn.json`, `synthetic_anthropic_max_tokens.json`, `synthetic_anthropic_thinking_block.json`, `proxy/tests/test_anthropic.py`.
   - Tests:
     - `build_request`:
@@ -173,7 +174,7 @@ On failure it raises one of the errors below. It never returns half a result.
     - `parse_error_message` reads the real 401 body.
   - Commit: `feat: add Anthropic messages adapter`
 
-- [ ] **4. Google generateContent adapter**
+- [x] **4. Google generateContent adapter**
   - Files: `proxy/adapters/google.py`, `proxy/tests/fixtures/google_multiturn.json`, `synthetic_google_max_tokens.json`, `synthetic_google_blocked_prompt.json`, `synthetic_google_thought_part.json`, `proxy/tests/test_google.py`.
   - Tests:
     - `build_request`:
@@ -191,7 +192,7 @@ On failure it raises one of the errors below. It never returns half a result.
     - `parse_error_message` reads the real 401 body.
   - Commit: `feat: add Google generateContent adapter`
 
-- [ ] **5. `send_chat` entry point**
+- [x] **5. `send_chat` entry point**
   - Files:
     - `proxy/client.py`: `send_chat(...)`. It does these in order:
       1. checks the interface and the history
@@ -223,7 +224,14 @@ On failure it raises one of the errors below. It never returns half a result.
     - `max_tokens` defaults to `PROXY_DEFAULT_MAX_TOKENS`, and `timeout` to `PROXY_TIMEOUT_SECONDS`.
   - Commit: `feat: add send_chat proxy client`
 
-- [ ] **6. `proxy_smoke` management command**
+- [x] **6. `proxy_smoke` management command**
+  - Live check result (2026-09-29):
+    - Run 1 (all):
+      - openai: `ProxyTimeout` after 30.1 s.
+      - anthropic: OK, 183 in / 9 out, `stop`, 13.7 s.
+      - google: OK, 183 in / 2 out, `stop`, 1.6 s.
+      - Exit code 1.
+    - Run 2 (openai only, by hand): OK, 183 in / 9 out, `stop`, 1.9 s. Exit code 0.
   - Files: `proxy/management/__init__.py`, `proxy/management/commands/__init__.py`, `proxy/management/commands/proxy_smoke.py`, `proxy/tests/test_smoke_command.py`.
   - Usage: `venv/bin/python manage.py proxy_smoke [--interface openai|anthropic|google|all] [--prompt "..."]`. The default is `all` and "Say hello in one sentence."
   - For each interface it:
@@ -238,7 +246,10 @@ On failure it raises one of the errors below. It never returns half a result.
     - A timeout is reported as it is, not hidden. If it happens, run that interface once more by hand and report both results.
   - Commit: `feat: add proxy_smoke management command`
 
-- [ ] **7. Record anything surprising (only if needed)**
+- [x] **7. Record anything surprising (only if needed)**
+  - Done:
+    - `proxy-timeouts.md` now has the live timing results and points to the code and `proxy_smoke`.
+    - New `proxy-logs-not-shown.md`: with no `LOGGING` setting, the `proxy` INFO lines are dropped, and WARNING lines go to stderr through Python's fallback handler.
   - If steps 1–6 or the live check find surprising behavior, record it in `doc/wiki/footguns/`.
   - If nothing is surprising, skip this step and say so.
   - Commit: `docs: record proxy client footguns`
