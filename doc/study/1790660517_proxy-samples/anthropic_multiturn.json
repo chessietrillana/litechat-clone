@@ -1,0 +1,21 @@
+{
+  "content": [
+    {
+      "text": "You asked me to say hello in one sentence.",
+      "type": "text"
+    }
+  ],
+  "id": "f18da32f-d356-4c66-9b0e-f1ed2b0d09b5",
+  "model": "claude-haiku-4-5-20251001",
+  "role": "assistant",
+  "stop_reason": "end_turn",
+  "stop_sequence": null,
+  "type": "message",
+  "usage": {
+    "cache_creation_input_tokens": 0,
+    "cache_read_input_tokens": 0,
+    "input_tokens": 203,
+    "output_tokens": 10,
+    "service_tier": "standard"
+  }
+}
