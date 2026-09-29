@@ -292,3 +292,9 @@ NOTE: Q30: Done. DJANGO_SECRET_KEY is now in .env.
 NOTE: Section 9: don't name the catalog table "Model". It's confusing next to Django's models.Model. Use a clearer name like LLMModel.
 
 NOTE: Other open questions: the human will answer them before the plans that need them. Start with plans 1 and 2 (project setup, then auth).
+
+NOTE: Q24: Max reply length is 1024 tokens (PROXY_DEFAULT_MAX_TOKENS).
+
+NOTE: Q25: Thinking/reasoning is off.
+
+NOTE: Q26: No system prompt for now.
