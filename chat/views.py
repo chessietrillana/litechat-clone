@@ -12,7 +12,7 @@ from proxy.errors import ProxyError
 def render_chat(request, template, context):
     """Render a chat page with the sidebar's session list."""
     context = {
-        'sessions': request.user.chat_sessions.all(),
+        'sessions': request.user.chat_sessions.visible(),
         'current_session': None,
         **context,
     }
@@ -51,7 +51,7 @@ def new_chat(request):
 def session_detail(request, pk):
     """GET shows the session. POST sends the next message."""
     session = get_object_or_404(
-        ChatSession.objects.select_related('llm_model', 'billing_account__owner'),
+        ChatSession.objects.visible().select_related('llm_model', 'billing_account__owner'),
         pk=pk, user=request.user,
     )
     error = None
