@@ -11,6 +11,7 @@
 - Scope each piece of work to fit one Conventional Commit (feat:, fix:, docs:, chore:, build:, refactor:, test:, style:). Tell me (the human) how you scoped it. If the work cannot fit one commit, stop and ask before continuing.
 - After each change, suggest a commit message. You may make the commit.
 - Protect the codebase. Never delete files or folders, reset or drop the database, run git reset --hard, git push --force, git rebase, or delete branches unless the human explicitly asks.
+- Never amend a commit that is already pushed. Make a new commit instead. Before any git commit --amend, check the commit is not on the remote (git branch -r --contains HEAD prints nothing).
 - Do not assume dependencies or integrations exist. Before planning, check installed packages (venv/bin/pip list), settings.py, urls.py, and existing apps. If something is missing, say so and ask before installing it.
 - Do not guess the proxy's API shapes. Check the proxy docs and capture real sample responses before building against them.
 - Do not start the dev server yourself (it blocks). Use venv/bin/python manage.py check and tests instead. Ask the human to run the server and report back.
