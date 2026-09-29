@@ -52,7 +52,7 @@ Branch: `feat/model-catalog`, made from `main`.
 
 ## Steps
 
-- [ ] **1. `LLMModel` model and admin**
+- [x] **1. `LLMModel` model and admin**
   - Files:
     - `catalog/` (new app, `venv/bin/python manage.py startapp catalog`). Add `"catalog"` to `INSTALLED_APPS`.
     - `catalog/models.py`: `Provider` (TextChoices), `Tier` (IntegerChoices), `LLMModelQuerySet.active()`, `LLMModel`, with `__str__` returning the display name.
