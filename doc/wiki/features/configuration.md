@@ -24,11 +24,15 @@ Never commit `.env`. It is git-ignored. `.env.example` lists the names with no v
 
 ## Proxy settings
 
-- `PROXY_BASE_URL = "https://proxy.litechat.ai"`
-- `PROXY_KEYS = {"openai": ..., "anthropic": ..., "google": ...}`
+| Setting | Value | Meaning |
+|---|---|---|
+| `PROXY_BASE_URL` | `https://proxy.litechat.ai` | The proxy |
+| `PROXY_KEYS` | `{"openai": ..., "anthropic": ..., "google": ...}` | One key per interface, from `.env` |
+| `PROXY_TIMEOUT_SECONDS` | `30` | Timeout for every proxy request. No retries. |
+| `PROXY_DEFAULT_MAX_TOKENS` | `1024` | Max reply length (study NOTE Q24) |
 
 A missing proxy key becomes `""`. The app still starts, and `check` and tests still run.
-Code that calls the proxy must check the key and give a clear error. (No such code exists yet.)
+`send_chat` checks the key at call time and raises `ProxyConfigError` without making a request. See [Proxy client](proxy-client.md).
 
 Each key works only with its own interface. A wrong key gets a 401. See the study for details.
 

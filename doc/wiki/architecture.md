@@ -17,6 +17,14 @@ accounts/               App: sign up, log in, log out
   templates/
     registration/login.html
     accounts/signup.html
+proxy/                  App: talks to the LLM proxy (no models, no URLs)
+  types.py              Message, ChatResult
+  errors.py             ProxyError and subclasses
+  transport.py          The only HTTP code (urllib, 30 s timeout, no retry)
+  adapters/             openai.py, anthropic.py, google.py
+  client.py             send_chat()
+  management/commands/proxy_smoke.py   Live check command
+  tests/                Tests and fixtures/ (real and synthetic proxy replies)
 templates/              Shared templates
   base.html             Page shell and nav bar
   home.html             Home page
@@ -31,10 +39,17 @@ doc/                    Studies, plans, and this wiki
 | App | What it does |
 |---|---|
 | `accounts` | Sign up, log in, log out. No models. Uses Django's built-in `User`. |
+| `proxy` | `send_chat()` sends a chat history to the proxy and returns text and token usage. No models, no URLs. Has the `proxy_smoke` command. See [Proxy client](features/proxy-client.md). |
 
 Django built-in apps: `admin`, `auth`, `contenttypes`, `sessions`, `messages`, `staticfiles`.
 
-Planned apps (from the study): `catalog`, `billing`, `chat`, and a `proxy` module.
+Planned apps (from the study): `catalog`, `billing`, `chat`.
+
+## Management commands
+
+| Command | What |
+|---|---|
+| `proxy_smoke [--interface X] [--prompt "..."]` | Sends one live request per proxy interface and prints the result. Uses real keys and the network. |
 
 ## Models
 

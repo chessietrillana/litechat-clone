@@ -7,7 +7,7 @@ The LLMs come through the proxy at https://proxy.litechat.ai.
 
 **Status (2026-09-29):**
 
-- Built: project setup, and sign up / log in / log out.
+- Built: project setup, sign up / log in / log out, and the proxy client (`send_chat`, not yet used by any page).
 - The home page only says hello. Chat, models, and billing are not built yet.
 
 Planned features are in [TODO.md](../../TODO.md). The full study is in `doc/study/1790660517_litechat-core.md`.
@@ -16,6 +16,7 @@ Planned features are in [TODO.md](../../TODO.md). The full study is in `doc/stud
 
 - [Configuration](features/configuration.md): settings and `.env`.
 - [Auth](features/auth.md): sign up, log in, log out, home page.
+- [Proxy client](features/proxy-client.md): `send_chat()` and the `proxy_smoke` live check.
 
 ## Stack
 
@@ -55,6 +56,12 @@ venv/bin/python manage.py test
 
 Tests do not call the proxy and do not need real keys.
 
+To check the real proxy (uses the network and your keys):
+
+```
+venv/bin/python manage.py proxy_smoke
+```
+
 ## Known problems
 
 See [footguns](footguns/):
@@ -62,3 +69,4 @@ See [footguns](footguns/):
 - [Python HTTPS certificates on macOS](footguns/python-ssl-certificates-macos.md)
 - [Proxy requests can hang](footguns/proxy-timeouts.md)
 - [Django logout needs a POST](footguns/django-logout-requires-post.md)
+- [Proxy log lines are not shown yet](footguns/proxy-logs-not-shown.md)
