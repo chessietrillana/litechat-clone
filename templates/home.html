@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load billing %}
 
 {% block title %}Home{% endblock %}
 
@@ -6,4 +7,15 @@
   <h1>Hello, {{ user.username }}.</h1>
   <p>Chat is coming soon.</p>
   <p><a href="{% url 'models' %}">See the available models</a></p>
+
+  <h2>Your billing accounts</h2>
+  {% if billing_accounts %}
+    <ul class="billing-accounts">
+      {% for account in billing_accounts %}
+        <li>{{ account }}: {{ account.balance|credits }} credits</li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">You have no billing accounts.</p>
+  {% endif %}
 {% endblock %}

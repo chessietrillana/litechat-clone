@@ -54,6 +54,9 @@ PROXY_TIMEOUT_SECONDS = 30
 # Max reply length in tokens (study NOTE Q24).
 PROXY_DEFAULT_MAX_TOKENS = 1024
 
+# Billing. Free credits every new user gets in their personal account (study NOTE Q12).
+BILLING_SIGNUP_GRANT_CREDITS = 1000
+
 
 # Application definition
 
@@ -67,6 +70,7 @@ INSTALLED_APPS = [
     'accounts',
     'proxy',
     'catalog',
+    'billing',
 ]
 
 MIDDLEWARE = [
