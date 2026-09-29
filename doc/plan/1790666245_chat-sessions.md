@@ -218,7 +218,8 @@ Branch: `feat/chat-sessions`. The plan file is committed on this branch, as aske
     - The JS itself is checked by the human at rendezvous (steps below).
   - Commit: `feat: disable Send while waiting and send on Enter`
 
-- [ ] **6. Show proxy log lines in the terminal**
+- [x] **6. Show proxy log lines in the terminal**
+  - Also: each line shows the time and level. `manage.py test` now prints the lines from the proxy client tests (fake replies). This is noted in the footgun.
   - Files: `config/settings.py` (`LOGGING`: the `proxy` logger at INFO to the console), `doc/wiki/footguns/proxy-logs-not-shown.md` (say it's fixed).
   - Tests: a test with `assertLogs('proxy', 'INFO')` still passes. A test checks that the `proxy` logger's level is INFO.
   - Commit: `feat: show proxy log lines in the console`

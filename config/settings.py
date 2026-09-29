@@ -57,6 +57,22 @@ PROXY_DEFAULT_MAX_TOKENS = 1024
 # Billing. Free credits every new user gets in their personal account (study NOTE Q12).
 BILLING_SIGNUP_GRANT_CREDITS = 1000
 
+# Show the proxy's one line per call (INFO: tokens and time, WARNING: failures)
+# on the console. The lines never contain keys or message text.
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {'format': '{asctime} {levelname} {name}: {message}', 'style': '{'},
+    },
+    'handlers': {
+        'console': {'class': 'logging.StreamHandler', 'formatter': 'simple'},
+    },
+    'loggers': {
+        'proxy': {'handlers': ['console'], 'level': 'INFO', 'propagate': False},
+    },
+}
+
 
 # Application definition
 
