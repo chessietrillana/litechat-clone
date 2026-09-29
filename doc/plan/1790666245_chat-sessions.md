@@ -224,7 +224,8 @@ Branch: `feat/chat-sessions`. The plan file is committed on this branch, as aske
   - Tests: a test with `assertLogs('proxy', 'INFO')` still passes. A test checks that the `proxy` logger's level is INFO.
   - Commit: `feat: show proxy log lines in the console`
 
-- [ ] **7. Record footguns**
+- [x] **7. Record footguns**
+  - Also: the note on two tabs explains that each tab sends only the history it had. An empty reply counts as a failure too.
   - Files: `doc/wiki/footguns/chat-waits-for-the-reply.md` (new):
     - The browser waits up to 30 seconds for each reply. With JS, the button says "Waiting for reply…". That is the only sign of progress.
     - Without JS: no progress sign, Enter does not send, and a double click on **Send** can send two turns.
