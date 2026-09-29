@@ -24,7 +24,7 @@ Branch: `feat/project-setup`, made from `main`.
   - Test: `git check-ignore -v .claude/settings.local.json` prints the `.gitignore` rule.
   - Commit: `chore: ignore Claude Code local settings`
 
-- [ ] **2. Install Django 5.2.x and python-dotenv**
+- [x] **2. Install Django 5.2.x and python-dotenv**
   - Files: `requirements.txt` (new).
   - Do: `venv/bin/pip install "Django>=5.2,<5.3" python-dotenv`, then `venv/bin/pip freeze > requirements.txt`.
   - Test: `venv/bin/python -m django --version` prints `5.2.x`. `venv/bin/pip install -r requirements.txt` reports nothing new to install.
