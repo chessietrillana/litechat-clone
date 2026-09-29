@@ -224,7 +224,14 @@ On failure it raises one of the errors below. It never returns half a result.
     - `max_tokens` defaults to `PROXY_DEFAULT_MAX_TOKENS`, and `timeout` to `PROXY_TIMEOUT_SECONDS`.
   - Commit: `feat: add send_chat proxy client`
 
-- [ ] **6. `proxy_smoke` management command**
+- [x] **6. `proxy_smoke` management command**
+  - Live check result (2026-09-29):
+    - Run 1 (all):
+      - openai: `ProxyTimeout` after 30.1 s.
+      - anthropic: OK, 183 in / 9 out, `stop`, 13.7 s.
+      - google: OK, 183 in / 2 out, `stop`, 1.6 s.
+      - Exit code 1.
+    - Run 2 (openai only, by hand): OK, 183 in / 9 out, `stop`, 1.9 s. Exit code 0.
   - Files: `proxy/management/__init__.py`, `proxy/management/commands/__init__.py`, `proxy/management/commands/proxy_smoke.py`, `proxy/tests/test_smoke_command.py`.
   - Usage: `venv/bin/python manage.py proxy_smoke [--interface openai|anthropic|google|all] [--prompt "..."]`. The default is `all` and "Say hello in one sentence."
   - For each interface it:
