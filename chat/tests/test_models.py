@@ -48,6 +48,22 @@ class ChatSessionTests(TestCase):
             [Message('user', 'question 1'), Message('assistant', 'answer 1')],
         )
 
+    def test_history_leaves_out_turns_with_empty_replies(self):
+        session = make_session(self.alice, turns=1)
+        ChatMessage.objects.create(session=session, role='user', content='question 2')
+        ChatMessage.objects.create(session=session, role='assistant', content=' \n')
+        ChatMessage.objects.create(session=session, role='user', content='question 3')
+        ChatMessage.objects.create(session=session, role='assistant', content='answer 3')
+        self.assertEqual(session.history(), [
+            Message('user', 'question 1'), Message('assistant', 'answer 1'),
+            Message('user', 'question 3'), Message('assistant', 'answer 3'),
+        ])
+
+    def test_empty_reply_flag(self):
+        self.assertTrue(ChatMessage(role='assistant', content='  ').is_empty_reply)
+        self.assertFalse(ChatMessage(role='assistant', content='Hi').is_empty_reply)
+        self.assertFalse(ChatMessage(role='user', content='').is_empty_reply)
+
     def test_cut_off_flag(self):
         session = make_session(self.alice)
         message = ChatMessage.objects.create(

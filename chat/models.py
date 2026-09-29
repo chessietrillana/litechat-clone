@@ -47,8 +47,20 @@ class ChatSession(models.Model):
         return self.title
 
     def history(self):
-        """All messages as proxy Messages, oldest first."""
-        return [Message(m.role, m.content) for m in self.messages.all()]
+        """All messages as proxy Messages, oldest first.
+
+        A turn whose reply is empty is left out, both its question and its
+        reply: the proxy refuses empty messages, and the history must keep
+        going user, assistant, user, assistant.
+        """
+        history = []
+        for m in self.messages.all():
+            if m.is_empty_reply:
+                if history and history[-1].role == ChatMessage.Role.USER:
+                    history.pop()
+                continue
+            history.append(Message(m.role, m.content))
+        return history
 
 
 class ChatMessage(models.Model):
@@ -82,6 +94,11 @@ class ChatMessage(models.Model):
     @property
     def was_cut_off(self):
         return self.finish_reason == 'length'
+
+    @property
+    def is_empty_reply(self):
+        """An empty reply is saved only when it was charged (it reported usage)."""
+        return self.role == self.Role.ASSISTANT and not self.content.strip()
 
     @property
     def cost_micro(self):

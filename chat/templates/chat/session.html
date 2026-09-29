@@ -18,6 +18,9 @@
       <div class="bubble bubble-{{ m.role }}">
         <span class="visually-hidden">{% if m.role == 'user' %}You{% else %}{{ current_session.llm_model.display_name }}{% endif %}:</span>
         <div class="bubble-text">{{ m.content }}</div>
+        {% if m.is_empty_reply %}
+          <p class="bubble-note">The model sent an empty reply. The tokens it used were charged. This turn is left out of later messages to the model.</p>
+        {% endif %}
         {% if m.was_cut_off %}
           <p class="bubble-note">This reply was cut off at the length limit.</p>
         {% endif %}

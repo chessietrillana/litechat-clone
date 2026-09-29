@@ -4,7 +4,7 @@ from unittest import mock
 from django.test import TestCase
 from django.utils import timezone
 
-from billing.models import BillingAccount
+from billing.models import BillingAccount, LedgerEntry
 from chat import services
 from chat.models import ChatMessage, ChatSession
 from chat.services import ChatError, send_turn, start_session
@@ -56,11 +56,25 @@ class StartSessionTests(TestCase):
         self.assertFalse(ChatSession.objects.exists())
         self.assertFalse(ChatMessage.objects.exists())
 
-    def test_empty_reply_saves_nothing(self, send_chat):
-        send_chat.return_value = reply(text='  \n')
+    def test_empty_reply_without_usage_saves_nothing(self, send_chat):
+        send_chat.return_value = reply(text='  \n', input_tokens=None, output_tokens=None)
         with self.assertRaisesMessage(ChatError, services.EMPTY_REPLY):
             start_session(self.alice, self.model, self.account, 'Hi')
         self.assertFalse(ChatSession.objects.exists())
+        self.assertFalse(LedgerEntry.objects.filter(kind='charge').exists())
+
+    def test_empty_reply_with_usage_is_saved_and_charged(self, send_chat):
+        send_chat.return_value = reply(text='  \n', input_tokens=183, output_tokens=0)
+        session = start_session(self.alice, self.model, self.account, 'Hi')
+        question, answer = session.messages.all()
+        self.assertEqual(question.content, 'Hi')
+        self.assertTrue(answer.is_empty_reply)
+        self.assertEqual(answer.charge.tokens, 183)
+
+        # The next send leaves the empty turn out: its history is just the new message.
+        send_chat.return_value = reply()
+        send_turn(session, 'Hello?')
+        self.assertEqual(send_chat.call_args.args[2], [Message('user', 'Hello?')])
 
     def test_turned_off_model_is_refused_before_sending(self, send_chat):
         self.model.is_active = False
@@ -115,6 +129,18 @@ class SendTurnTests(TestCase):
         self.assertEqual(history[6], Message('user', 'question 4'))
         self.assertEqual(self.session.messages.count(), 8)
         self.assertEqual(self.session.messages.last().content, 'answer 4')
+
+    def test_empty_reply_turn_is_left_out_of_later_history(self, send_chat):
+        send_chat.return_value = reply(text='', input_tokens=190, output_tokens=0)
+        send_turn(self.session, 'question 4')
+        self.assertEqual(self.session.messages.count(), 8)
+
+        send_chat.return_value = reply(text='answer 5')
+        send_turn(self.session, 'question 5')
+        history = send_chat.call_args.args[2]
+        self.assertEqual(len(history), 7)
+        self.assertEqual(history[5], Message('assistant', 'answer 3'))
+        self.assertEqual(history[6], Message('user', 'question 5'))
 
     def test_returns_the_reply(self, send_chat):
         send_chat.return_value = reply(text='answer 4', finish_reason='length')

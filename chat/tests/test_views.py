@@ -198,6 +198,23 @@ class SessionPageTests(TestCase):
         self.assertEqual(self.session.messages.count(), 6)
         self.assertContains(self.client.get(self.url), 'answer 3')
 
+    def test_empty_reply_with_usage_is_saved_with_a_note(self, send_chat):
+        send_chat.return_value = reply(text='', input_tokens=190, output_tokens=0)
+        response = self.client.post(self.url, {'message': 'question 3'})
+        self.assertRedirects(response, self.url)
+        self.assertEqual(self.session.messages.count(), 6)
+        page = self.client.get(self.url)
+        self.assertContains(page, 'question 3')
+        self.assertContains(page, 'The model sent an empty reply. The tokens it used were charged.')
+
+    def test_empty_reply_without_usage_shows_error_keeps_text(self, send_chat):
+        send_chat.return_value = reply(text='', input_tokens=None, output_tokens=None)
+        response = self.client.post(self.url, {'message': 'question 3'})
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'The model sent an empty reply. Please try again.')
+        self.assertContains(response, 'question 3</textarea>')
+        self.assertEqual(self.session.messages.count(), 4)
+
     def test_proxy_failure_shows_error_keeps_text_saves_nothing(self, send_chat):
         send_chat.side_effect = ProxyTimeout('timed out')
         response = self.client.post(self.url, {'message': 'question 3'})

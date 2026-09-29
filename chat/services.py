@@ -84,8 +84,10 @@ def send_turn(session, text):
 def _ask(llm_model, history):
     # ProxyError is passed on unchanged. The view shows its user_message.
     result = send_chat(llm_model.provider, llm_model.proxy_model_id, history)
-    if not result.text.strip():
-        # An empty reply would break the next turn's history, so it is not saved.
+    if not result.text.strip() and billed_tokens(result) is None:
+        # Nothing to show and nothing to charge, so nothing is saved.
+        # An empty reply that reported usage is saved and charged (study NOTEs Q8, Q16),
+        # and history() leaves that turn out.
         raise ChatError(EMPTY_REPLY)
     return result
 
