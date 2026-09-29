@@ -334,3 +334,13 @@ NOTE: Q17: Each user gets an auto-created personal account; admins can create sh
 NOTE: Q18: Users can bill to their personal account or any shared account they belong to.
 
 NOTE: Q19: Admins add members to shared accounts; no per-member limits.
+
+NOTE: Q20: Model and billing account are fixed at session start.
+
+NOTE: Q21: Deleting a session hides it; its charges remain.
+
+NOTE: Q22: No history cap.
+
+NOTE: Q23: Default session title = first few words of the first message.
+
+NOTE: Q28: Yes, a simple read-only usage page listing the user's charges (fold into the metering plan, not a separate plan).
