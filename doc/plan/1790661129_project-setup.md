@@ -30,7 +30,7 @@ Branch: `feat/project-setup`, made from `main`.
   - Test: `venv/bin/python -m django --version` prints `5.2.x`. `venv/bin/pip install -r requirements.txt` reports nothing new to install.
   - Commit: `build: add Django 5.2 and python-dotenv`
 
-- [ ] **3. Start the Django project**
+- [x] **3. Start the Django project**
   - Files: `manage.py`, `config/__init__.py`, `config/settings.py`, `config/urls.py`, `config/asgi.py`, `config/wsgi.py` (all new, from `venv/bin/django-admin startproject config .`).
   - Test: `venv/bin/python manage.py check` reports no issues. `venv/bin/python manage.py migrate` runs (creates `db.sqlite3`, which is already git-ignored).
   - Note: the generated `settings.py` has a hardcoded `SECRET_KEY`. It is replaced in step 4. It is a throwaway dev value, not a real secret, but step 4 must land before anything is pushed.
