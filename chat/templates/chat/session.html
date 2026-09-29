@@ -29,6 +29,14 @@
     </div>
   </div>
 
+  {% if out_of_credits %}
+  <div class="chat-input chat-blocked">
+    {% if error %}<p class="chat-error" role="alert">{{ error }}</p>{% endif %}
+    <p><strong>This billing account has no credits left, so sending is blocked.</strong>
+      Ask an admin to add credits, or start a new chat with another account.</p>
+    <p class="chat-hint">A reply's cost is known only after it arrives, so one reply can take the balance below 0. Then sending stops until an admin adds credits.</p>
+  </div>
+  {% else %}
   <form method="post" action="{% url 'chat_session' current_session.pk %}" class="chat-input" data-chat-form>
     {% csrf_token %}
     {% if error %}<p class="chat-error" role="alert">{{ error }}</p>{% endif %}
@@ -39,4 +47,5 @@
       <button type="submit" data-waiting-text="Waiting for reply…">Send</button>
     </div>
   </form>
+  {% endif %}
 {% endblock %}

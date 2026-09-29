@@ -92,7 +92,8 @@ class StartSessionTests(TestCase):
     def test_shared_account_needs_membership(self, send_chat):
         send_chat.return_value = reply()
         team = BillingAccount.objects.create(kind=BillingAccount.Kind.SHARED, name='Team')
-        with self.assertRaises(ChatError):
+        LedgerEntry.objects.create(account=team, amount_micro=5_000_000, kind='admin_grant')
+        with self.assertRaisesMessage(ChatError, services.ACCOUNT_NOT_ALLOWED):
             start_session(self.alice, self.model, team, 'Hi')
         team.members.add(self.alice)
         session = start_session(self.alice, self.model, team, 'Hi')

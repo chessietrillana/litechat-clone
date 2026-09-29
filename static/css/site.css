@@ -169,6 +169,11 @@ body.chat-page {
 
 .chat-error { margin: 0 0 0.5rem; padding: 0.5rem 0.75rem; color: #a40e26; background: #ffebe9; border-radius: 4px; }
 
+/* Shown in place of the input box when the account has no credits left. */
+.chat-blocked { background: #fff8c5; }
+.chat-blocked p { margin: 0 0 0.4rem; }
+.chat-hint { font-size: 0.875rem; color: #59636e; }
+
 /* Narrow screens: the sidebar sits above the chat. */
 @media (max-width: 700px) {
   body.chat-page { height: auto; }

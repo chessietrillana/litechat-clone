@@ -21,6 +21,10 @@ BLANK_MESSAGE = 'Type a message first.'
 TOO_LONG = f'Messages can be at most {MAX_MESSAGE_CHARS:,} characters.'
 EMPTY_REPLY = 'The model sent an empty reply. Please try again.'
 NO_PRICE = 'This model has no price set. Please tell the site admin.'
+NO_CREDITS = (
+    'This billing account has no credits left. '
+    'Ask an admin to add credits, or start a new chat with another account.'
+)
 
 
 class ChatError(Exception):
@@ -42,8 +46,13 @@ def check_can_send(user, llm_model, billing_account):
     """Refuse a send before the proxy call. Return the tier price to charge at."""
     if not llm_model.is_active:
         raise ChatError(MODEL_OFF)
-    if not BillingAccount.objects.for_user(user).filter(pk=billing_account.pk).exists():
+    account = BillingAccount.objects.for_user(user).with_balance().filter(pk=billing_account.pk).first()
+    if account is None:
         raise ChatError(ACCOUNT_NOT_ALLOWED)
+    # Blocked at 0 or less (study NOTE Q14-15). The cost is only known after the
+    # reply, so one turn can still take the balance below 0.
+    if account.balance <= 0:
+        raise ChatError(NO_CREDITS)
     # Read now, so an admin price edit while we wait doesn't change this turn.
     tier_price = TierPrice.objects.filter(tier=llm_model.tier).first()
     if tier_price is None:

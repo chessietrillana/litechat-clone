@@ -4,7 +4,7 @@ from django.views.decorators.http import require_http_methods, require_POST, req
 
 from chat.forms import MessageForm, NewChatForm
 from chat.models import ChatSession
-from chat.services import ChatError, send_turn, start_session
+from chat.services import NO_CREDITS, ChatError, send_turn, start_session
 from proxy.errors import ProxyError
 
 
@@ -65,9 +65,15 @@ def session_detail(request, pk):
                 return redirect('chat_session', session.pk)
     else:
         form = MessageForm()
+    balance = session.billing_account.balance_micro()
+    out_of_credits = balance <= 0
+    if out_of_credits and error == NO_CREDITS:
+        error = None  # The page already says so in place of the input box.
     return render_chat(request, 'chat/session.html', {
         'current_session': session,
         'chat_messages': session.messages.all(),
         'form': form,
         'error': error,
+        'balance': balance,
+        'out_of_credits': out_of_credits,
     })
