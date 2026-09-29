@@ -172,7 +172,7 @@ body.chat-page {
 /* Shown in place of the input box when the account has no credits left. */
 .chat-blocked { background: #fff8c5; }
 .chat-blocked p { margin: 0 0 0.4rem; }
-.chat-hint { font-size: 0.875rem; color: #59636e; }
+.chat-hint { margin: 0.25rem 0 0; font-size: 0.75rem; color: #59636e; }
 
 /* Narrow screens: the sidebar sits above the chat. */
 @media (max-width: 700px) {
@@ -209,6 +209,7 @@ body.chat-page {
   border-bottom-left-radius: 4px;
 }
 .bubble-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.bubble-usage { margin: 0.4rem 0 0; font-size: 0.75rem; color: #59636e; }
 .bubble-note { margin: 0.4rem 0 0; font-size: 0.8rem; color: #9a6700; }
 
 /* Set by static/js/chat.js while a reply is on its way. */

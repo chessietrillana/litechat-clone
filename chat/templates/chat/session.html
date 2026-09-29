@@ -1,4 +1,5 @@
 {% extends "chat/layout.html" %}
+{% load billing %}
 
 {% block title %}{{ current_session.title }}{% endblock %}
 
@@ -7,8 +8,10 @@
     <h1 class="chat-title">{{ current_session.title }}</h1>
     <p class="chat-meta">
       {{ current_session.llm_model.display_name }} ({{ current_session.llm_model.get_tier_display }})
-      · billed to {{ current_session.billing_account }}
+      · billed to {{ current_session.billing_account }}, balance {{ balance|credits }} credits
     </p>
+    <p class="chat-meta">This chat: {{ total_tokens|thousands }} tokens · {{ total_cost|credits }} credits</p>
+    <p class="chat-hint">A reply's cost is known only after it arrives, so one reply can take the balance below 0. Then sending stops until an admin adds credits.</p>
   </div>
 
   {# column-reverse on .chat-scroll starts the scroll at the newest message, with no JS. #}
@@ -24,6 +27,11 @@
         {% if m.was_cut_off %}
           <p class="bubble-note">This reply was cut off at the length limit.</p>
         {% endif %}
+        {% if m.role == 'assistant' %}
+          <p class="bubble-usage">
+            {% if m.charge %}{{ m.input_tokens|thousands }} in · {{ m.output_tokens|thousands }} out · {{ m.cost_micro|credits }} credits{% else %}No usage reported · not charged{% endif %}
+          </p>
+        {% endif %}
       </div>
     {% endfor %}
     </div>
@@ -34,7 +42,6 @@
     {% if error %}<p class="chat-error" role="alert">{{ error }}</p>{% endif %}
     <p><strong>This billing account has no credits left, so sending is blocked.</strong>
       Ask an admin to add credits, or start a new chat with another account.</p>
-    <p class="chat-hint">A reply's cost is known only after it arrives, so one reply can take the balance below 0. Then sending stops until an admin adds credits.</p>
   </div>
   {% else %}
   <form method="post" action="{% url 'chat_session' current_session.pk %}" class="chat-input" data-chat-form>
