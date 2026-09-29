@@ -112,7 +112,8 @@ Branch: `feat/chat-sessions`. The plan file is committed on this branch, as aske
 
 ## Steps
 
-- [ ] **1. Chat app: session and message models**
+- [x] **1. Chat app: session and message models**
+  - Also: `updated_at` is set by the chat services, not `auto_now`, so a later rename (plan 8) won't move a chat to the top. `ChatMessage.was_cut_off` is true when `finish_reason` is `length`. Test helpers live in `chat/tests/helpers.py`.
   - Files:
     - `chat/` (new app, `venv/bin/python manage.py startapp chat`). Add `"chat"` to `INSTALLED_APPS`.
     - `chat/models.py`: `ChatSession`, `ChatMessage`, and `make_title(text)`.
