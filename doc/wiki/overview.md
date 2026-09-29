@@ -15,8 +15,8 @@ The LLMs come through the proxy at https://proxy.litechat.ai.
   - billing accounts: personal accounts with 1,000 sign-up credits, shared accounts, admin credit grants, per-tier prices
   - chat sessions: pick a model and a billing account, chat with the full history sent each turn, a sidebar of your chats
   - metering: each turn is charged at its tier price, tokens and cost shown in the chat, sending blocked at a balance of 0 or less, a Usage page
-- Not built yet:
-  - renaming and deleting chats
+  - the sidebar: rename and delete chats (delete hides the chat; its charges stay)
+- All eight plans in the study's build order are done. Ideas for later are in TODO.md.
 - The home page is the new chat page, in a Litechat-style layout: your chats on the left, the chat on the right.
 
 Planned features are in [TODO.md](../../TODO.md). The full study is in `doc/study/1790660517_litechat-core.md`.
@@ -30,6 +30,7 @@ Planned features are in [TODO.md](../../TODO.md). The full study is in `doc/stud
 - [Billing accounts](features/billing-accounts.md): accounts, credits (stored as micro-credits), ledger, balances, grants, tier prices.
 - [Chat sessions](features/chat-sessions.md): new chat, the session page, the sidebar, the Send button script.
 - [Metering](features/metering.md): charging each turn, blocking at 0, tokens and cost in the chat, the Usage page.
+- [Sidebar](features/sidebar.md): rename and delete (hide) chats.
 
 ## Stack
 
@@ -61,6 +62,7 @@ Planned features are in [TODO.md](../../TODO.md). The full study is in `doc/stud
 6. Open http://127.0.0.1:8000/. You are sent to the login page. Sign up, or log in.
 7. Pick a model and a billing account, type a message, and click **Send**. This calls the real proxy, so the three `PROXY_*_API_KEY` values must be in `.env`. The runserver terminal prints one `proxy` line per call.
    Each reply is charged to the account you picked. Under the reply you see its tokens and cost. Click **Usage** in the header to see all your charges.
+   To rename or delete a chat, click "⋯" next to it in the sidebar.
 8. The admin is at http://127.0.0.1:8000/admin/.
 
 ## How to check it
@@ -90,3 +92,4 @@ See [footguns](footguns/):
 - [The chat page waits for each reply](footguns/chat-waits-for-the-reply.md)
 - [The balance can go below 0](footguns/balance-can-go-below-zero.md)
 - [Anthropic's input_tokens leaves out cached tokens](footguns/anthropic-input-tokens-leave-out-cache.md)
+- [Deleted chats are only hidden](footguns/deleted-chats-are-only-hidden.md)

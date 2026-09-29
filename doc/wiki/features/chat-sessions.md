@@ -4,7 +4,7 @@ Users chat with a model in sessions. A session has one model and one billing acc
 Every turn sends the full history to the proxy. The app looks like Litechat: a sidebar on the left, the chat on the right.
 
 Each turn is charged to the session's billing account. Sending stops at a balance of 0 or less. See [Metering](metering.md).
-Rename and delete come in the sidebar plan (plan 8).
+Rename and delete are in [Sidebar](sidebar.md). Delete only hides a chat.
 
 Plan: `doc/plan/1790666245_chat-sessions.md`. Decisions: study NOTEs Q20, Q22–Q26.
 
@@ -21,7 +21,7 @@ Plan: `doc/plan/1790666245_chat-sessions.md`. Decisions: study NOTEs Q20, Q22–
    - Your messages are on the right (blue). Replies are on the left (white).
    - The list opens scrolled to the newest message.
    - A reply that hit the length limit shows "This reply was cut off at the length limit."
-4. The sidebar lists the user's chats, most recent activity first, and a **New chat** button. The open chat is highlighted.
+4. The sidebar lists the user's chats, most recent activity first, and a **New chat** button. The open chat is highlighted. Each chat has a "⋯" menu with **Rename** and **Delete** (see [Sidebar](sidebar.md)).
 
 Under 700px wide, the sidebar sits above the chat.
 
@@ -31,7 +31,7 @@ Under 700px wide, the sidebar sits above the chat.
 - **Full history, no cap** (NOTE Q22). Turn 4 sends 7 messages.
 - **Title** (NOTE Q23): the first 6 words of the first message, at most 60 characters, with "…" if cut. See `make_title` in `chat/models.py`.
 - **Reply options:** max 1,024 tokens (Q24), thinking off (Q25), no system prompt (Q26). These are `send_chat`'s defaults.
-- **Only the owner** can see or send in a session. Others get 404.
+- **Only the owner** can see or send in a session. Others get 404. A deleted (hidden) chat is also 404, and `send_turn` refuses it.
 - **Checks on every send**, before the proxy is called:
   - The message is not blank and is at most 20,000 characters.
   - The model is still active. If not: "This model has been turned off. Start a new chat with another model."
@@ -60,7 +60,7 @@ Without JavaScript the forms still work. See [the footgun](../footguns/chat-wait
 
 | Model | Fields |
 |---|---|
-| `ChatSession` | `user`, `llm_model` (protected), `billing_account` (protected), `title`, `created_at`, `updated_at` (set on every turn; the sidebar sorts by it) |
+| `ChatSession` | `user`, `llm_model` (protected), `billing_account` (protected), `title`, `created_at`, `updated_at` (set on every turn; the sidebar sorts by it), `hidden_at` (see [Sidebar](sidebar.md)) |
 | `ChatMessage` | `session`, `role` (`user` or `assistant`), `content`, and for replies: `input_tokens`, `output_tokens`, `cached_tokens`, `finish_reason`, `response_id`, `created_at` |
 
 - Token counts are empty if the proxy did not report them. Then there is no charge.
@@ -74,15 +74,15 @@ Without JavaScript the forms still work. See [the footgun](../footguns/chat-wait
 |---|---|
 | `chat/models.py` | `ChatSession`, `ChatMessage`, `make_title` |
 | `chat/services.py` | `start_session`, `send_turn`, `ChatError`. The only chat code that calls `send_chat`. |
-| `chat/forms.py` | `NewChatForm` (choices limited to the user), `MessageForm` |
-| `chat/views.py` | `home`, `new_chat`, `session_detail` |
-| `chat/templates/chat/` | `layout.html` (sidebar), `new.html`, `session.html` |
+| `chat/forms.py` | `NewChatForm` (choices limited to the user), `MessageForm`, `RenameForm` |
+| `chat/views.py` | `home`, `new_chat`, `session_detail`, and `own_session`, `rename_session`, `delete_session` (see [Sidebar](sidebar.md)) |
+| `chat/templates/chat/` | `layout.html` (sidebar), `new.html`, `session.html`, `rename.html`, `delete.html` |
 | `static/css/site.css` | Layout, sidebar, bubbles |
 | `static/js/chat.js` | Send button script |
 
 ## Admin
 
-**Chat → Chat sessions**: view only. The list shows title, user, model, account, and times. Each session shows its messages with token counts and cost. No add, change, or delete.
+**Chat → Chat sessions**: view only. The list shows title, user, model, account, and times, including when a user deleted it. The **Deleted by user** filter shows hidden chats. Each session shows its messages with token counts and cost. No add, change, or delete.
 
 ## Logs
 
@@ -95,6 +95,7 @@ All in `chat/tests/`. `send_chat` is always mocked. No test calls the proxy.
 - `test_models.py`: titles, message order, `history()`, protected model and account, the view-only admin.
 - `test_services.py`: what is saved, full history in order, `updated_at`, nothing saved on failure or on an empty reply with no usage, empty replies with usage, turned-off model, account rules, text limits.
 - `test_charging.py`, `test_balance_block.py`, `test_usage_display.py`: see [Metering](metering.md).
+- `test_hide.py`, `test_rename.py`, `test_delete.py`: see [Sidebar](sidebar.md).
 - `test_views.py`:
   - home page: greeting, pickers, balances, only the user's accounts (moved from `config/tests.py`)
   - sidebar: own chats only, order, current chat marked

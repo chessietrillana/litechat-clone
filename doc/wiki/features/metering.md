@@ -46,6 +46,7 @@ Plan: `doc/plan/1790667382_metering.md`. Decisions: study NOTEs Q5–Q10, Q14–
 - **Usage page** (`/usage/`, **Usage** in the header, login needed, read only):
   - "Your billing accounts": each account the user can bill to, with its balance (it can be negative).
   - "Your charges": the user's own charges, newest first. Date, chat (linked), model, account, tokens (in / out), price per 1K, cost.
+  - A charge from a deleted chat stays listed. The chat shows as "<title> (deleted)", with no link. See [Sidebar](sidebar.md).
   - 50 rows per page, with **Newer** and **Older** links.
   - On a shared account, only your own charges are listed. Other members' use still shows in the balance.
 
@@ -55,7 +56,7 @@ Plan: `doc/plan/1790667382_metering.md`. Decisions: study NOTEs Q5–Q10, Q14–
 - Charge-only fields: `tokens` (billed) and `price_per_1k_tokens` (the price used). A database check makes charges have both and never add credits. Grants have neither.
 - `created_by` is the user who sent the message.
 - `ChatMessage.charge` links a reply to its charge (one-to-one, protected). Empty when nothing was charged.
-- Charges are never changed or deleted. Deleting a chat or message keeps its charge.
+- Charges are never changed or deleted. A user deleting a chat only hides it, so its charges stay. Even removing a chat from the database keeps its charges.
 - A user who made charges can't be deleted (`created_by` is protected). Untick **Active** instead.
 
 ## Admin
