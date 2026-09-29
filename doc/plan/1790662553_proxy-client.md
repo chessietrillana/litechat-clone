@@ -140,7 +140,7 @@ On failure it raises one of the errors below. It never returns half a result.
     - A fake key in the headers never shows up in the text of any raised error.
   - Commit: `feat: add proxy app with HTTP transport and errors`
 
-- [ ] **2. OpenAI Chat Completions adapter**
+- [x] **2. OpenAI Chat Completions adapter**
   - Files: `proxy/adapters/__init__.py`, `proxy/adapters/openai.py`, `proxy/tests/fixtures/openai_single.json`, `openai_multiturn.json` (copied from the study), `synthetic_openai_length.json`, `synthetic_openai_no_usage.json`, `proxy/tests/test_openai.py`.
   - Tests:
     - `build_request`:

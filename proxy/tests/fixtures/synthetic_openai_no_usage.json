@@ -1,0 +1,16 @@
+{
+  "_note": "Synthetic. A reply with no usage block, to test that token fields become null.",
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "content": "Hello!",
+        "role": "assistant"
+      }
+    }
+  ],
+  "id": "synthetic-openai-no-usage",
+  "model": "gpt-5.6-luna",
+  "object": "chat.completion"
+}
