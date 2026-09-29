@@ -10,7 +10,16 @@
   <header class="site-header">
     <a class="brand" href="/">Litechat</a>
     <nav class="site-nav">
-      {% block nav %}{% endblock %}
+      {% if user.is_authenticated %}
+        <span class="nav-user">{{ user.username }}</span>
+        {# Logout must be a POST in Django 5+. See doc/wiki/footguns. #}
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="link-button">Log out</button>
+        </form>
+      {% else %}
+        <a href="{% url 'login' %}">Log in</a>
+      {% endif %}
     </nav>
   </header>
 
