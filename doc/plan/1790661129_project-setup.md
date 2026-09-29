@@ -19,7 +19,7 @@ Branch: `feat/project-setup`, made from `main`.
 
 ## Steps
 
-- [ ] **1. Ignore Claude Code local settings**
+- [x] **1. Ignore Claude Code local settings**
   - Files: `.gitignore` (add `.claude/settings.local.json`).
   - Test: `git check-ignore -v .claude/settings.local.json` prints the `.gitignore` rule.
   - Commit: `chore: ignore Claude Code local settings`
