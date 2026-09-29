@@ -7,8 +7,12 @@ The LLMs come through the proxy at https://proxy.litechat.ai.
 
 **Status (2026-09-29):**
 
-- Built: project setup, sign up / log in / log out, and the proxy client (`send_chat`, not yet used by any page).
-- The home page only says hello. Chat, models, and billing are not built yet.
+- Built:
+  - project setup
+  - sign up / log in / log out
+  - the proxy client (`send_chat`, not yet used by any page)
+  - the model catalog: three models with provider and tier, a Models page, and on/off in the admin
+- Not built yet: chat and billing. The home page only says hello and links to Models.
 
 Planned features are in [TODO.md](../../TODO.md). The full study is in `doc/study/1790660517_litechat-core.md`.
 
@@ -17,6 +21,7 @@ Planned features are in [TODO.md](../../TODO.md). The full study is in `doc/stud
 - [Configuration](features/configuration.md): settings and `.env`.
 - [Auth](features/auth.md): sign up, log in, log out, home page.
 - [Proxy client](features/proxy-client.md): `send_chat()` and the `proxy_smoke` live check.
+- [Model catalog](features/model-catalog.md): `LLMModel`, the Models page, turning models on and off.
 
 ## Stack
 
@@ -32,7 +37,7 @@ Planned features are in [TODO.md](../../TODO.md). The full study is in `doc/stud
    venv/bin/pip install -r requirements.txt
    ```
 2. Make a `.env` file in the repo root. Copy `.env.example` and fill in the values. `DJANGO_SECRET_KEY` is required. See [Configuration](features/configuration.md).
-3. Set up the database:
+3. Set up the database. This also adds the three models to the catalog.
    ```
    venv/bin/python manage.py migrate
    ```
