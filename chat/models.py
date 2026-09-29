@@ -65,6 +65,12 @@ class ChatMessage(models.Model):
     cached_tokens = models.PositiveIntegerField(null=True, blank=True)
     finish_reason = models.CharField(max_length=20, blank=True)
     response_id = models.CharField(max_length=200, blank=True)
+    # Assistant replies only. Empty when nothing was charged (no usage reported).
+    # Protected: a charge is never deleted, and deleting a message keeps it.
+    charge = models.OneToOneField(
+        'billing.LedgerEntry', null=True, blank=True, on_delete=models.PROTECT,
+        related_name='chat_message',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -76,3 +82,8 @@ class ChatMessage(models.Model):
     @property
     def was_cut_off(self):
         return self.finish_reason == 'length'
+
+    @property
+    def cost_micro(self):
+        """What this reply cost in µc (a positive number), or None if not charged."""
+        return -self.charge.amount_micro if self.charge_id else None
