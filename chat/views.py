@@ -4,7 +4,7 @@ from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods, require_POST, require_safe
 
-from chat.forms import MessageForm, NewChatForm
+from chat.forms import MessageForm, NewChatForm, RenameForm
 from chat.models import ChatSession
 from chat.services import NO_CREDITS, ChatError, send_turn, start_session
 from proxy.errors import ProxyError
@@ -98,3 +98,21 @@ def delete_session(request, pk):
         messages.success(request, f'Deleted "{session.title}".')
         return redirect('home')
     return render_chat(request, 'chat/delete.html', {'current_session': session})
+
+
+@login_required
+@require_http_methods(['GET', 'HEAD', 'POST'])
+def rename_session(request, pk):
+    session = own_session(request, pk)
+    if request.method == 'POST':
+        form = RenameForm(request.POST)
+        if form.is_valid():
+            session.title = form.cleaned_data['title']
+            # Only the title: a rename is not activity, so the chat keeps its
+            # place in the sidebar. It also can't undo a turn saved meanwhile.
+            session.save(update_fields=['title'])
+            messages.success(request, 'Chat renamed.')
+            return redirect('chat_session', session.pk)
+    else:
+        form = RenameForm(initial={'title': session.title})
+    return render_chat(request, 'chat/rename.html', {'current_session': session, 'form': form})

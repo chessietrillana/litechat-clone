@@ -22,6 +22,7 @@
               <details class="session-menu">
                 <summary aria-label="Options for {{ s.title }}" title="Options">⋯</summary>
                 <div class="session-menu-items">
+                  <a href="{% url 'chat_rename' s.pk %}">Rename</a>
                   <a href="{% url 'chat_delete' s.pk %}">Delete</a>
                 </div>
               </details>
