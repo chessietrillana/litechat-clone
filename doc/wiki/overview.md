@@ -10,21 +10,25 @@ The LLMs come through the proxy at https://proxy.litechat.ai.
 - Built:
   - project setup
   - sign up / log in / log out
-  - the proxy client (`send_chat`, not yet used by any page)
+  - the proxy client (`send_chat`)
   - the model catalog: three models with provider and tier, a Models page, and on/off in the admin
   - billing accounts: personal accounts with 1,000 sign-up credits, shared accounts, admin credit grants, per-tier prices
-- Not built yet: chat, charging per turn (metering), and the usage page.
-- The home page says hello, links to Models, and lists your billing accounts with balances.
+  - chat sessions: pick a model and a billing account, chat with the full history sent each turn, a sidebar of your chats
+- Not built yet:
+  - charging per turn (metering) and the usage page. **Chatting is free for now.**
+  - renaming and deleting chats
+- The home page is the new chat page, in a Litechat-style layout: your chats on the left, the chat on the right.
 
 Planned features are in [TODO.md](../../TODO.md). The full study is in `doc/study/1790660517_litechat-core.md`.
 
 ## Features
 
 - [Configuration](features/configuration.md): settings and `.env`.
-- [Auth](features/auth.md): sign up, log in, log out, home page.
+- [Auth](features/auth.md): sign up, log in, log out.
 - [Proxy client](features/proxy-client.md): `send_chat()` and the `proxy_smoke` live check.
 - [Model catalog](features/model-catalog.md): `LLMModel`, the Models page, turning models on and off.
 - [Billing accounts](features/billing-accounts.md): accounts, credits (stored as micro-credits), ledger, balances, grants, tier prices.
+- [Chat sessions](features/chat-sessions.md): new chat, the session page, the sidebar, the Send button script.
 
 ## Stack
 
@@ -54,7 +58,8 @@ Planned features are in [TODO.md](../../TODO.md). The full study is in `doc/stud
    venv/bin/python manage.py runserver
    ```
 6. Open http://127.0.0.1:8000/. You are sent to the login page. Sign up, or log in.
-7. The admin is at http://127.0.0.1:8000/admin/.
+7. Pick a model and a billing account, type a message, and click **Send**. This calls the real proxy, so the three `PROXY_*_API_KEY` values must be in `.env`. The runserver terminal prints one `proxy` line per call.
+8. The admin is at http://127.0.0.1:8000/admin/.
 
 ## How to check it
 
@@ -63,7 +68,7 @@ venv/bin/python manage.py check
 venv/bin/python manage.py test
 ```
 
-Tests do not call the proxy and do not need real keys.
+Tests do not call the proxy and do not need real keys. They print some `proxy` log lines from fake replies. That is expected.
 
 To check the real proxy (uses the network and your keys):
 
@@ -78,5 +83,6 @@ See [footguns](footguns/):
 - [Python HTTPS certificates on macOS](footguns/python-ssl-certificates-macos.md)
 - [Proxy requests can hang](footguns/proxy-timeouts.md)
 - [Django logout needs a POST](footguns/django-logout-requires-post.md)
-- [Proxy log lines are not shown yet](footguns/proxy-logs-not-shown.md)
+- [Proxy log lines were not shown (fixed)](footguns/proxy-logs-not-shown.md)
 - [Every user gets a billing account, and users can't be deleted](footguns/every-user-gets-a-billing-account.md)
+- [The chat page waits for each reply](footguns/chat-waits-for-the-reply.md)

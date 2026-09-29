@@ -3,7 +3,7 @@
 One function, `send_chat`, sends a chat history to the proxy and returns the reply and token usage.
 It works the same way for the OpenAI, Anthropic, and Google interfaces. Nothing else in the app should talk to the proxy.
 
-There is no UI for this yet. The chat plan will use it.
+The chat app calls it from one place: `chat/services.py`. See [Chat sessions](chat-sessions.md).
 
 Plan: `doc/plan/1790662553_proxy-client.md`. Study: `doc/study/1790660517_litechat-core.md`.
 
@@ -114,6 +114,5 @@ Test data is in `proxy/tests/fixtures/`:
 
 ## Known gaps
 
-- Log lines are not shown yet. See [proxy logs not shown](../footguns/proxy-logs-not-shown.md).
 - Error bodies other than 401 were never captured live. Their parsing is based on the docs.
 - No streaming (out of scope).

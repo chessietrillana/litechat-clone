@@ -11,7 +11,8 @@ Reply times also vary a lot for the same tiny prompt. In one `proxy_smoke` run o
 - anthropic: 13.7 s
 - openai: timed out at 30 s. It took 1.9 s when run again right after.
 
-So a slow success can come close to the 30 s limit. Watch this once real chats (with long histories) exist.
+So a slow success can come close to the 30 s limit. Watch this in real chats, since long histories may be slower.
+A chat page waits for the whole reply. See [the chat page waits for each reply](chat-waits-for-the-reply.md).
 
 Without a timeout, a request can hang for minutes.
 Retries make it worse. One test used a 90 second timeout with 3 retries. It hung for more than 5 minutes.

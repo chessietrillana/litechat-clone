@@ -34,7 +34,8 @@ A data migration (`catalog/migrations/0002_seed_proxy_models.py`) adds these row
 | `created_at`, `updated_at` | Timestamps |
 
 - Default order: tier, then display name.
-- `LLMModel.objects.active()` gives only active models. The chat plan will use it for the model picker.
+- `LLMModel.objects.active()` gives only active models. The new chat form uses it for the model picker.
+- Turning a model off also stops sending in existing chats with it. Their messages still show.
 - No prices yet. Pricing questions (Q5–Q10) are still open.
 
 ## Admin
@@ -44,7 +45,7 @@ Django admin → **Catalog** → **LLM models**.
 - Tick or untick **Active** in the list, then click **Save**.
 - Or select models and use the **Turn on selected models** / **Turn off selected models** action.
 - Filter by provider, tier, or active. Search by name or proxy model ID.
-- **Models cannot be deleted** in the admin. Turn them off instead. Chat sessions will point at models later.
+- **Models cannot be deleted** in the admin. Turn them off instead. Chat sessions point at models, and protect them from deletion.
 - To add a model, click **Add LLM model**. Its provider must match one of the three proxy interfaces.
 
 ## Models page
@@ -52,7 +53,7 @@ Django admin → **Catalog** → **LLM models**.
 - URL: `/models/` (name `models`). Login needed. Visitors are sent to the login page.
 - A table of active models in tier order: Model, Provider, Tier.
 - If no models are active, it says "No models are available right now."
-- Linked from the nav bar (logged-in users) and the home page.
+- Linked from the nav bar (logged-in users) and the new chat page ("About the models").
 
 ## Tests
 

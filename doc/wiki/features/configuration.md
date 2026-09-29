@@ -44,6 +44,14 @@ Each key works only with its own interface. A wrong key gets a 401. See the stud
 
 Tier prices are not settings. They live in the database and are edited in the admin.
 
+## Logging
+
+`LOGGING` sends the `proxy` logger to the console at INFO level, with the time and level.
+So `runserver` prints one line per proxy call: tokens and time on success, the error type on failure.
+The lines never contain keys or message text. See [the footgun](../footguns/proxy-logs-not-shown.md).
+
+Chat limits that are not settings: messages can be at most 20,000 characters (`MAX_MESSAGE_CHARS` in `chat/services.py`).
+
 ## How to check the keys load (without printing them)
 
 ```

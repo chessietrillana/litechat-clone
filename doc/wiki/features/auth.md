@@ -30,7 +30,7 @@ Plan: `doc/plan/1790661940_auth.md`.
 ## Home page
 
 - URL: `/`. Needs login. Visitors are sent to `/accounts/login/?next=/`.
-- Shows "Hello, <username>." The chat plan will replace this page.
+- It is the new chat page: "Hello, <username>." and the new chat form. See [Chat sessions](chat-sessions.md).
 
 ## Settings
 
@@ -55,4 +55,4 @@ When the name did not exist yet, the redirect crashed with `NoReverseMatch`. The
 
 - `accounts/tests.py`, class `LoginTests`: login form, good and bad login, `next`, redirects, logout by POST, GET logout refused (405), nav shows the right links.
 - `accounts/tests.py`, class `SignUpTests`: form has only username and two passwords, valid sign-up, not staff, taken username, mismatched passwords, weak password, redirect when logged in.
-- `config/tests.py`, class `HomePageTests`: visitor redirect, logged-in user sees their name.
+- `chat/tests/test_views.py`, class `HomePageTests`: visitor redirect, logged-in user sees their name.

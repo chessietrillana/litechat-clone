@@ -25,12 +25,12 @@ Plan: `doc/plan/1790664853_billing-accounts.md`. Decisions: study NOTEs Q5–Q13
 | Personal | Automatically, one per user | The owner |
 | Shared | Admins only (NOTE Q17) | Its members, added by admins (NOTE Q19) |
 
-- `BillingAccount.objects.for_user(user)` gives the accounts a user may bill to: their personal account plus the shared ones they belong to (NOTE Q18). Chat will use it for the account picker.
+- `BillingAccount.objects.for_user(user)` gives the accounts a user may bill to: their personal account plus the shared ones they belong to (NOTE Q18). The new chat form uses it for the account picker, and every send checks it again.
 - Database rules:
   - A personal account has an owner, and a shared one has none.
   - A shared account has a name.
   - A user has at most one personal account.
-- Accounts cannot be deleted.
+- Accounts cannot be deleted. Chat sessions also protect the account they bill to.
 
 ## Ledger and balance
 
@@ -78,9 +78,10 @@ Django admin → **Billing**:
 
 Only staff can use the admin. Users cannot grant themselves credits (NOTE Q13).
 
-## Home page
+## Where users see balances
 
-"Your billing accounts" lists each account the user can bill to, with its balance, e.g. "alice (personal): 1,000 credits".
+The new chat page (`/`) has a **Billing account** picker. It lists each account the user can bill to, with its balance, e.g. "alice (personal) · 1,000 credits".
+The session page shows which account the chat is billed to. Chatting does not charge yet (plan 7).
 
 ## Tests
 
@@ -95,4 +96,4 @@ All in `billing/tests/`, plus `config/tests.py`:
   - user deletion is blocked
   - the backfill
 - `test_admin.py`: account list, shared account add and name rule, locked personal accounts, no delete, grant form, bad amounts, read-only entries, non-staff refused.
-- `config/tests.py` `HomeBillingAccountsTests`: the home page shows the right accounts and balances.
+- `chat/tests/test_views.py` `HomePageTests`: the account picker shows the right accounts and balances.
