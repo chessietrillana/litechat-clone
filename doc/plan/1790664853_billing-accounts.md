@@ -204,7 +204,7 @@ People never see µc:
     - A logged-in non-staff user cannot open the admin grant page (redirected to the admin login).
   - Commit: `feat: add billing admin with shared accounts and credit grants`
 
-- [ ] **5. Show billing accounts on the home page**
+- [x] **5. Show billing accounts on the home page**
   - Files: `config/views.py` (pass `BillingAccount.objects.for_user(user).with_balance()`), `templates/home.html`, `config/tests.py`.
   - Tests:
     - A new user sees "Your billing accounts" and their personal account with 1,000 credits.
