@@ -51,7 +51,7 @@ Branch: `feat/project-setup`, made from `main`.
     - `grep -n SECRET_KEY config/settings.py` shows no literal key.
   - Commit: `feat: load settings and proxy keys from .env`
 
-- [ ] **5. Add smoke tests**
+- [x] **5. Add smoke tests**
   - Files: `config/tests.py` (new).
   - Tests:
     - The admin login page (`/admin/login/`) returns 200.
