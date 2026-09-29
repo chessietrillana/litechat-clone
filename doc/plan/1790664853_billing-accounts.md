@@ -212,7 +212,8 @@ People never see µc:
     - Shared accounts they are not a member of, and other people's personal accounts, are not shown.
   - Commit: `feat: show billing accounts and balances on the home page`
 
-- [ ] **6. Record footguns**
+- [x] **6. Record footguns**
+  - Also covers the user-deletion rule (users with ledger entries cannot be deleted; untick Active instead).
   - Files: `doc/wiki/footguns/every-user-gets-a-billing-account.md` (new).
   - Content:
     - The `post_save` signal runs for every new `User`: in tests, in `createsuperuser`, and in the admin.
