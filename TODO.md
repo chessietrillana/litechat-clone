@@ -26,4 +26,4 @@ Open questions in section 13 of the study. Needed before:
 
 ## Also
 
-- [ ] Human: confirm the project-setup browser check (admin login works).
+- [x] Human: confirm the project-setup browser check (admin login works). Confirmed 2026-09-29: saw Groups and Users.
