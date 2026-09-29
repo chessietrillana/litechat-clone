@@ -3,7 +3,7 @@
 One function, `send_chat`, sends a chat history to the proxy and returns the reply and token usage.
 It works the same way for the OpenAI, Anthropic, and Google interfaces. Nothing else in the app should talk to the proxy.
 
-The chat app calls it from one place: `chat/services.py`. See [Chat sessions](chat-sessions.md).
+The chat app calls it from one place: `chat/services.py`. See [Chat sessions](chat-sessions.md). Metering bills `input_tokens + output_tokens`. See [Metering](metering.md).
 
 Plan: `doc/plan/1790662553_proxy-client.md`. Study: `doc/study/1790660517_litechat-core.md`.
 
@@ -31,7 +31,7 @@ except ProxyError as e:
 | Field | Meaning |
 |---|---|
 | `text` | Reply text. Thinking blocks and thought parts are left out. |
-| `input_tokens`, `output_tokens`, `cached_tokens` | Token counts, or `None` if the proxy sent no usage |
+| `input_tokens`, `output_tokens`, `cached_tokens` | Token counts, or `None` if the proxy sent no usage. `input_tokens` includes cached tokens on every interface. `cached_tokens` is the cache reads, for information. |
 | `finish_reason` | `stop`, `length` (cut off), `filtered`, `tool_call`, or `other` |
 | `raw_finish_reason` | What the proxy actually sent, e.g. `end_turn` |
 | `response_id` | The proxy's ID (`None` for Google, which sends none) |
@@ -75,7 +75,7 @@ All errors are subclasses of `ProxyError`. Each has `user_message`, `detail`, an
 | `proxy/errors.py` | Error classes |
 | `proxy/transport.py` | The only HTTP code. One POST, one timeout, no retry. Stdlib `urllib`. |
 | `proxy/adapters/openai.py` | Chat Completions: `/openai/v1/chat/completions`, `Authorization: Bearer` |
-| `proxy/adapters/anthropic.py` | Messages: `/anthropic/v1/messages`, `x-api-key`, `anthropic-version` |
+| `proxy/adapters/anthropic.py` | Messages: `/anthropic/v1/messages`, `x-api-key`, `anthropic-version`. Adds cache reads and writes to `input_tokens`. See [the footgun](../footguns/anthropic-input-tokens-leave-out-cache.md). |
 | `proxy/adapters/google.py` | generateContent: `/google/v1beta/models/<model>:generateContent`, `x-goog-api-key`. Role `assistant` becomes `model`. |
 | `proxy/client.py` | `send_chat`: check input, read key, build request, send, map errors, parse, log |
 

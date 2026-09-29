@@ -31,18 +31,21 @@ catalog/                App: the list of LLMs users can pick
   views.py, urls.py     Models page
   templates/catalog/model_list.html
   tests.py
-billing/                App: billing accounts, ledger, tier prices
+billing/                App: billing accounts, ledger, tier prices, charges, Usage page
   units.py              Credits <-> micro-credits (µc), formatting
   models.py             BillingAccount, LedgerEntry, TierPrice
+  charges.py            record_charge()
   signals.py            New user -> personal account + sign-up grant
   forms.py              Admin forms (shared account, grant credits)
-  admin.py              Accounts, grants, tier prices
-  templatetags/billing.py   {{ amount_micro|credits }}
-  migrations/0003_seed_tier_prices.py, 0004_backfill_personal_accounts.py
+  admin.py              Accounts, grants, charges (read-only), tier prices
+  views.py, urls.py     Usage page
+  templates/billing/usage.html
+  templatetags/billing.py   Filters: credits, thousands, negate, price
+  migrations/0003_seed_tier_prices.py, 0004_backfill_personal_accounts.py, 0005_ledger_charges.py
   tests/
 chat/                   App: chat sessions, the home page, the sidebar
   models.py             ChatSession, ChatMessage, make_title
-  services.py           start_session, send_turn (the only chat code that calls the proxy)
+  services.py           start_session, send_turn (the only chat code that calls the proxy; charges each turn)
   forms.py              NewChatForm, MessageForm
   views.py, urls.py     home, new_chat, session_detail
   admin.py              View-only chat sessions
@@ -65,8 +68,8 @@ doc/                    Studies, plans, and this wiki
 | `accounts` | Sign up, log in, log out. No models. Uses Django's built-in `User`. |
 | `proxy` | `send_chat()` sends a chat history to the proxy and returns text and token usage. No models, no URLs. Has the `proxy_smoke` command. See [Proxy client](features/proxy-client.md). |
 | `catalog` | `LLMModel`: the models users can pick, with provider and tier. Admin can turn them on and off. Models page. See [Model catalog](features/model-catalog.md). |
-| `billing` | Personal and shared billing accounts, the credit ledger, balances, sign-up credits, admin grants, per-tier prices. See [Billing accounts](features/billing-accounts.md). |
-| `chat` | Chat sessions and messages, the new chat (home) page, the session page, the sidebar. See [Chat sessions](features/chat-sessions.md). |
+| `billing` | Personal and shared billing accounts, the credit ledger, balances, sign-up credits, admin grants, per-tier prices, charges, the Usage page. See [Billing accounts](features/billing-accounts.md) and [Metering](features/metering.md). |
+| `chat` | Chat sessions and messages, the new chat (home) page, the session page, the sidebar. Charges each turn and blocks sending at 0. See [Chat sessions](features/chat-sessions.md) and [Metering](features/metering.md). |
 
 Django built-in apps: `admin`, `auth`, `contenttypes`, `sessions`, `messages`, `staticfiles`.
 
@@ -82,14 +85,14 @@ Django built-in apps: `admin`, `auth`, `contenttypes`, `sessions`, `messages`, `
 |---|---|---|
 | `LLMModel` | `catalog` | One LLM: display name, provider (= proxy interface), proxy model ID (unique), tier, active flag, timestamps. Default order: tier, then name. |
 | `BillingAccount` | `billing` | `kind` personal or shared, `name` (shared), `owner` (personal, cascades), `members` (shared, many-to-many with User). One personal account per user. |
-| `LedgerEntry` | `billing` | `account` (protected), `amount_micro` (signed µc), `kind` (`signup_grant`, `admin_grant`), `note`, `created_by` (protected), `created_at`. Never changed or deleted. Balance = sum. |
+| `LedgerEntry` | `billing` | `account` (protected), `amount_micro` (signed µc), `kind` (`signup_grant`, `admin_grant`, `charge`), `note`, `created_by` (protected; the granting admin, or the user who sent the message), `created_at`. Charges only: `tokens`, `price_per_1k_tokens` (the price used). Never changed or deleted. Balance = sum. |
 | `TierPrice` | `billing` | One row per `tier`: `price_per_1k_tokens` (credits, 3 decimals). Seeded 1 / 3 / 10. |
 | `ChatSession` | `chat` | `user`, `llm_model` (protected), `billing_account` (protected), `title`, `created_at`, `updated_at` (last activity). Model and account fixed at start. |
-| `ChatMessage` | `chat` | `session`, `role` (`user`/`assistant`), `content`; for replies: `input_tokens`, `output_tokens`, `cached_tokens`, `finish_reason`, `response_id`. `created_at`. |
+| `ChatMessage` | `chat` | `session`, `role` (`user`/`assistant`), `content`; for replies: `input_tokens` (cached included), `output_tokens`, `cached_tokens`, `finish_reason`, `response_id`, `charge` (one-to-one to `LedgerEntry`, protected, empty if not charged). `created_at`. |
 
 Users are Django's built-in `django.contrib.auth.models.User`.
 We chose not to use a custom user model. Billing data lives in the `billing` models.
-Every user has a personal `BillingAccount`, whose ledger entries protect the user from deletion.
+Every user has a personal `BillingAccount`, whose ledger entries protect the user from deletion. Charges they made protect them too.
 
 Database: SQLite at `db.sqlite3` in the repo root. It is git-ignored.
 
@@ -104,19 +107,21 @@ Database: SQLite at `db.sqlite3` in the repo root. It is git-ignored.
 | `/accounts/login/` | `login` | Django `LoginView` | No (logged-in users go home) |
 | `/accounts/logout/` | `logout` | Django `LogoutView` (POST only) | — |
 | `/models/` | `models` | `catalog.views.model_list` | Yes |
+| `/usage/` | `usage` | `billing.views.usage` (GET only) | Yes |
 | `/admin/` | — | Django admin | Staff only |
 
 ## Templates
 
 - `templates/base.html`: every page extends this. It has the nav bar.
   - Visitors see **Log in** and **Sign up** links.
-  - Logged-in users see **Models**, their username, and a **Log out** button (a POST form).
+  - Logged-in users see **Models**, **Usage**, their username, and a **Log out** button (a POST form).
   - Blocks: `content` (the narrow centered column, used by most pages), `main` (chat pages replace the whole column), `head`, `body_class`.
 - `templates/_messages.html`: the Django messages list. Included by `base.html` and the chat layout.
 - `chat/templates/chat/layout.html`: the chat layout. Sidebar (**New chat**, the user's chats) on the left, the chat on the right. Loads `js/chat.js`.
 - `chat/templates/chat/new.html`: the home page. "Hello, <username>." and the new chat form (model, billing account with balance, message).
-- `chat/templates/chat/session.html`: title, model and account, message bubbles, and the send box.
+- `chat/templates/chat/session.html`: title, model, account and balance, chat totals, message bubbles with tokens and cost, and the send box (or a "no credits" note at a balance of 0 or less).
 - `catalog/templates/catalog/model_list.html`: the models table, or an empty message.
+- `billing/templates/billing/usage.html`: the user's accounts with balances, and their charges with paging. Uses the `wide-page` body class.
 - `accounts/templates/registration/login.html`: the login form. Django's `LoginView` finds it by this path.
 - `accounts/templates/accounts/signup.html`: the sign-up form, with password rules shown.
 

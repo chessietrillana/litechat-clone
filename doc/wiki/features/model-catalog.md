@@ -36,7 +36,7 @@ A data migration (`catalog/migrations/0002_seed_proxy_models.py`) adds these row
 - Default order: tier, then display name.
 - `LLMModel.objects.active()` gives only active models. The new chat form uses it for the model picker.
 - Turning a model off also stops sending in existing chats with it. Their messages still show.
-- No prices yet. Pricing questions (Q5–Q10) are still open.
+- Prices are per tier, not per model: `TierPrice` in [Billing accounts](billing-accounts.md). Each turn is charged at its model's tier price. See [Metering](metering.md).
 
 ## Admin
 

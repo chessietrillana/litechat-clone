@@ -3,7 +3,7 @@
 Users chat with a model in sessions. A session has one model and one billing account, picked at the start.
 Every turn sends the full history to the proxy. The app looks like Litechat: a sidebar on the left, the chat on the right.
 
-Chatting is **free for now**. Charging per turn, blocking at balance ≤ 0, and the usage page come in the metering plan (plan 7).
+Each turn is charged to the session's billing account. Sending stops at a balance of 0 or less. See [Metering](metering.md).
 Rename and delete come in the sidebar plan (plan 8).
 
 Plan: `doc/plan/1790666245_chat-sessions.md`. Decisions: study NOTEs Q20, Q22–Q26.
@@ -15,7 +15,9 @@ Plan: `doc/plan/1790666245_chat-sessions.md`. Decisions: study NOTEs Q20, Q22–
    - **Billing account**: accounts the user may bill to, with balances, e.g. "alice (personal) · 1,000 credits".
    - **Message**: the first message.
 2. **Send** starts the chat. When the reply arrives, the user is taken to the session page (`/chat/<id>/`).
-3. The session page shows the title, the model and account, the messages as bubbles, and the send box at the bottom.
+3. The session page shows the title, the model, the account and its balance, the chat's total tokens and cost, the messages as bubbles, and the send box at the bottom.
+   - Under each reply: its tokens and cost, e.g. "183 in · 12 out · 0.585 credits".
+   - At a balance of 0 or less, a note replaces the send box.
    - Your messages are on the right (blue). Replies are on the left (white).
    - The list opens scrolled to the newest message.
    - A reply that hit the length limit shows "This reply was cut off at the length limit."
@@ -34,11 +36,13 @@ Under 700px wide, the sidebar sits above the chat.
   - The message is not blank and is at most 20,000 characters.
   - The model is still active. If not: "This model has been turned off. Start a new chat with another model."
   - The account is still one the user may bill to (`BillingAccount.objects.for_user`). If not: "You can no longer use this billing account. Start a new chat."
+  - The account's balance is above 0. If not: "This billing account has no credits left. …"
+  - The model's tier has a price. If not: "This model has no price set. Please tell the site admin."
 - **A turn is saved only when the proxy answers.**
-  - The proxy is called first, outside any database transaction. Then the user message and the reply are saved together, in one transaction.
-  - On a failure (timeout, proxy error, empty reply), nothing is saved. The error shows above the box, and the text stays in the box.
+  - The proxy is called first, outside any database transaction. Then the user message, the reply, and the charge are saved together, in one transaction.
+  - On a failure (timeout, proxy error, empty reply with no usage), nothing is saved. The error shows above the box, and the text stays in the box.
   - A failed first message makes no session.
-  - Plan 7 will add the charge to the same transaction.
+  - An empty reply that reported usage **is** saved and charged. It shows a note. `history()` leaves that turn out of later requests.
 - **Text is plain text.** Line breaks are kept. No Markdown. HTML in a message is shown as text, not run.
 - A successful send redirects back to the page (post/redirect/get), so reloading does not send again.
 
@@ -59,7 +63,9 @@ Without JavaScript the forms still work. See [the footgun](../footguns/chat-wait
 | `ChatSession` | `user`, `llm_model` (protected), `billing_account` (protected), `title`, `created_at`, `updated_at` (set on every turn; the sidebar sorts by it) |
 | `ChatMessage` | `session`, `role` (`user` or `assistant`), `content`, and for replies: `input_tokens`, `output_tokens`, `cached_tokens`, `finish_reason`, `response_id`, `created_at` |
 
-- Token counts are empty if the proxy did not report them. Plan 7 charges from them.
+- Token counts are empty if the proxy did not report them. Then there is no charge.
+- `input_tokens` includes cached tokens on every interface.
+- `ChatMessage.charge` links a reply to its ledger charge. See [Metering](metering.md).
 - A model or billing account that has sessions can't be deleted (`ProtectedError`).
 
 ## Code
@@ -76,7 +82,7 @@ Without JavaScript the forms still work. See [the footgun](../footguns/chat-wait
 
 ## Admin
 
-**Chat → Chat sessions**: view only. The list shows title, user, model, account, and times. Each session shows its messages with token counts. No add, change, or delete.
+**Chat → Chat sessions**: view only. The list shows title, user, model, account, and times. Each session shows its messages with token counts and cost. No add, change, or delete.
 
 ## Logs
 
@@ -87,7 +93,8 @@ Each proxy call prints one line in the runserver terminal, with tokens and time 
 All in `chat/tests/`. `send_chat` is always mocked. No test calls the proxy.
 
 - `test_models.py`: titles, message order, `history()`, protected model and account, the view-only admin.
-- `test_services.py`: what is saved, full history in order, `updated_at`, nothing saved on failure or empty reply, turned-off model, account rules, text limits.
+- `test_services.py`: what is saved, full history in order, `updated_at`, nothing saved on failure or on an empty reply with no usage, empty replies with usage, turned-off model, account rules, text limits.
+- `test_charging.py`, `test_balance_block.py`, `test_usage_display.py`: see [Metering](metering.md).
 - `test_views.py`:
   - home page: greeting, pickers, balances, only the user's accounts (moved from `config/tests.py`)
   - sidebar: own chats only, order, current chat marked

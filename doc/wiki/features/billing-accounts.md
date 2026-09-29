@@ -3,7 +3,7 @@
 Every user has a personal billing account with free credits. Admins can make shared accounts, add members, and grant credits.
 Each account's balance comes from a ledger. Per-tier token prices are set in the admin.
 
-Charging per chat turn, blocking at 0, and the usage page are **not built yet**. They come in the metering plan (plan 7).
+Charging per chat turn, blocking at 0, and the Usage page are in [Metering](metering.md).
 
 Plan: `doc/plan/1790664853_billing-accounts.md`. Decisions: study NOTEs Q5–Q13 and Q17–Q20.
 
@@ -35,7 +35,7 @@ Plan: `doc/plan/1790664853_billing-accounts.md`. Decisions: study NOTEs Q5–Q13
 ## Ledger and balance
 
 - `LedgerEntry`: account, `amount_micro` (signed), kind, note, `created_by`, `created_at`.
-- Kinds: `signup_grant` and `admin_grant`. Plan 7 will add `charge`, with negative amounts.
+- Kinds: `signup_grant`, `admin_grant`, and `charge` (negative amounts, with `tokens` and the price used). See [Metering](metering.md).
 - **Balance = the sum of the account's entries.** It is computed each time, not stored, so it can't drift from the ledger.
   - `account.balance_micro()` for one account.
   - `BillingAccount.objects.with_balance()` adds `balance` to each row. It uses a subquery, so filtering by members never counts an entry twice.
@@ -51,6 +51,7 @@ Plan: `doc/plan/1790664853_billing-accounts.md`. Decisions: study NOTEs Q5–Q13
 ## Users can't be deleted
 
 A user's personal account has ledger entries, and entries are protected. So deleting a user fails with `ProtectedError`, and nothing is removed.
+Charges a user made (on any account) protect them too.
 To lock someone out, untick **Active** on the user in the admin.
 
 ## Tier prices
@@ -58,7 +59,8 @@ To lock someone out, untick **Active** on the user in the admin.
 - `TierPrice`: one row per tier, `price_per_1k_tokens` in credits (up to 3 decimals, not negative).
 - Seeded (NOTE Q6): **Value 1, Standard 3, Premium 10** credits per 1K tokens.
 - One price for input, output, and cached tokens (NOTE Q5, Q9). No markup (NOTE Q7).
-- `micro_per_token` gives the exact µc per token (Value 1 → 1,000 µc).
+- `micro_per_token` gives the exact µc per token (Value 1 → 1,000 µc). `cost_micro(tokens)` gives the exact cost.
+- Each charge copies the price it used, so editing a price never changes old charges.
 
 ## Admin
 
@@ -72,7 +74,7 @@ Django admin → **Billing**:
   - No delete.
 - **Ledger entries**
   - **Add** is the **Grant credits** form: account, amount in credits (more than 0, up to 6 decimals), note. It records the admin who granted it.
-  - Existing entries are view-only.
+  - Existing entries, including charges, are view-only. The list shows tokens and price for charges. Filter by kind.
 - **Tier prices**
   - Edit the price right in the list and click **Save**. No add or delete.
 
@@ -81,7 +83,8 @@ Only staff can use the admin. Users cannot grant themselves credits (NOTE Q13).
 ## Where users see balances
 
 The new chat page (`/`) has a **Billing account** picker. It lists each account the user can bill to, with its balance, e.g. "alice (personal) · 1,000 credits".
-The session page shows which account the chat is billed to. Chatting does not charge yet (plan 7).
+The session page shows which account the chat is billed to, and its current balance.
+The **Usage** page (`/usage/`) lists every account the user can bill to, with its balance. See [Metering](metering.md).
 
 ## Tests
 
@@ -95,5 +98,6 @@ All in `billing/tests/`, plus `config/tests.py`:
   - the setting
   - user deletion is blocked
   - the backfill
+- `test_charges.py` and `test_usage_page.py`: see [Metering](metering.md).
 - `test_admin.py`: account list, shared account add and name rule, locked personal accounts, no delete, grant form, bad amounts, read-only entries, non-staff refused.
 - `chat/tests/test_views.py` `HomePageTests`: the account picker shows the right accounts and balances.

@@ -10,13 +10,12 @@ Build order from `doc/study/1790660517_litechat-core.md`. Each item is one plan.
 - [x] 4. Proxy client: `send_chat()`, one adapter per interface, 30 s timeout, no auto-retry, `proxy_smoke` live check. Plan: `doc/plan/1790662553_proxy-client.md`.
 - [x] 5. Billing accounts: personal (auto, 1,000 sign-up credits) and shared accounts, ledger, balance, admin grants, per-tier prices, credits stored as micro-credits. Plan: `doc/plan/1790664853_billing-accounts.md`.
 - [x] 6. Chat sessions: Litechat-style layout (sidebar + chat, bubbles, input at the bottom), new chat with model and account fixed at start (Q20), full history each turn (Q22), title from the first message (Q23), sidebar list newest activity first, Send-button script, proxy log lines on the console. Plan: `doc/plan/1790666245_chat-sessions.md`.
+- [x] 7. Metering: charge per turn at the tier price (Q5–Q9, cached tokens included, Anthropic cache counts added), the price stored on each charge (Q10), no usage = no charge (Q16), empty replies with usage saved and charged, block sending at balance <= 0 (Q14–15, one turn can go below 0), tokens and cost in the chat, Usage page (Q28). Plan: `doc/plan/1790667382_metering.md`.
 
 ## Next
 
-- [ ] 7. Metering: charge per turn at the tier price (Q5–Q9), store the price on each charge (Q10), charge only when the proxy returns usage (Q16), block sending at balance <= 0 (Q14–15), usage page listing the user's charges (Q28).
-  - Token counts are already saved on each reply (`ChatMessage`). Add the charge inside the same transaction in `chat/services.py`.
-  - Decide: charge for an empty reply that reported usage? It is not saved today.
 - [ ] 8. Sidebar: rename and delete sessions (delete hides; charges stay, Q21). The list and reopening are done in plan 6.
+  - Charges already outlive their chats (`ChatMessage.charge` is protected on the ledger side). A hidden chat's charges should still show on the Usage page; decide whether its title link stays.
 
 ## Waiting on the human
 
@@ -28,6 +27,8 @@ Nothing. Every open question in the study has an answer (section 14).
 - [ ] A way to take credits away (negative admin adjustment). Grants must be > 0 for now.
 - [ ] Block sending from two tabs at once (see `doc/wiki/footguns/chat-waits-for-the-reply.md`).
 - [ ] Streaming or a "typing" sign while waiting (streaming is out of scope for now).
+- [ ] A lock so two sends at once can't both pass the balance check (see `doc/wiki/footguns/balance-can-go-below-zero.md`).
+- [ ] Usage page: totals per account or per month, and a filter by account. Not asked for yet.
 
 ## Also
 
@@ -36,4 +37,5 @@ Nothing. Every open question in the study has an answer (section 14).
 - [x] Human: confirm the model-catalog browser check. Confirmed 2026-09-29: /models/ shows all 3 in tier order, turning one off hides it, turning it on shows it.
 - [x] Human: confirm the billing-accounts browser check. Confirmed 2026-09-29: steps 1–7, 9, 10 passed (step 8, the user-delete check, skipped; a test covers it).
 - [x] Human: confirm the chat-sessions browser check. Confirmed 2026-09-29: steps 1–12 passed, including the Send-button script and the no-JavaScript check.
+- [x] Human: confirm the metering browser check. Confirmed 2026-09-29: all 9 steps passed (charges, Usage page, price change keeps old prices, blocking at 0, grant unblocks).
 - [ ] Human: run `venv/bin/python manage.py proxy_smoke` in your own terminal and confirm all three interfaces answer.
