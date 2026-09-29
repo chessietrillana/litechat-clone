@@ -19,24 +19,24 @@ Branch: `feat/project-setup`, made from `main`.
 
 ## Steps
 
-- [ ] **1. Ignore Claude Code local settings**
+- [x] **1. Ignore Claude Code local settings**
   - Files: `.gitignore` (add `.claude/settings.local.json`).
   - Test: `git check-ignore -v .claude/settings.local.json` prints the `.gitignore` rule.
   - Commit: `chore: ignore Claude Code local settings`
 
-- [ ] **2. Install Django 5.2.x and python-dotenv**
+- [x] **2. Install Django 5.2.x and python-dotenv**
   - Files: `requirements.txt` (new).
   - Do: `venv/bin/pip install "Django>=5.2,<5.3" python-dotenv`, then `venv/bin/pip freeze > requirements.txt`.
   - Test: `venv/bin/python -m django --version` prints `5.2.x`. `venv/bin/pip install -r requirements.txt` reports nothing new to install.
   - Commit: `build: add Django 5.2 and python-dotenv`
 
-- [ ] **3. Start the Django project**
+- [x] **3. Start the Django project**
   - Files: `manage.py`, `config/__init__.py`, `config/settings.py`, `config/urls.py`, `config/asgi.py`, `config/wsgi.py` (all new, from `venv/bin/django-admin startproject config .`).
   - Test: `venv/bin/python manage.py check` reports no issues. `venv/bin/python manage.py migrate` runs (creates `db.sqlite3`, which is already git-ignored).
   - Note: the generated `settings.py` has a hardcoded `SECRET_KEY`. It is replaced in step 4. It is a throwaway dev value, not a real secret, but step 4 must land before anything is pushed.
   - Commit: `chore: start Django project`
 
-- [ ] **4. Load settings from .env**
+- [x] **4. Load settings from .env**
   - Files: `config/settings.py`, `.env.example` (new).
   - Do:
     - `load_dotenv(BASE_DIR / ".env")` at the top of settings.
@@ -51,7 +51,7 @@ Branch: `feat/project-setup`, made from `main`.
     - `grep -n SECRET_KEY config/settings.py` shows no literal key.
   - Commit: `feat: load settings and proxy keys from .env`
 
-- [ ] **5. Add smoke tests**
+- [x] **5. Add smoke tests**
   - Files: `config/tests.py` (new).
   - Tests:
     - The admin login page (`/admin/login/`) returns 200.
