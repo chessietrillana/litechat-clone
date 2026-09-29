@@ -1,0 +1,11 @@
+{
+  "_note": "Synthetic. A blocked prompt has no candidates, only promptFeedback (Gemini API reference). Never captured live.",
+  "modelVersion": "gemini-3.8-flash",
+  "promptFeedback": {
+    "blockReason": "SAFETY"
+  },
+  "usageMetadata": {
+    "promptTokenCount": 190,
+    "totalTokenCount": 190
+  }
+}

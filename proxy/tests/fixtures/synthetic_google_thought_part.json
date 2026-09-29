@@ -1,0 +1,28 @@
+{
+  "_note": "Synthetic. A thought part before the answer part. Never captured live (thinking is off).",
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "The user wants a greeting.",
+            "thought": true
+          },
+          {
+            "text": "Hello! I'm Gemini, ready to help with whatever you need."
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "modelVersion": "gemini-3.8-flash",
+  "usageMetadata": {
+    "cachedContentTokenCount": 0,
+    "candidatesTokenCount": 20,
+    "promptTokenCount": 183,
+    "totalTokenCount": 203
+  }
+}

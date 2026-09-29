@@ -1,0 +1,23 @@
+{
+  "_note": "Synthetic. Shape from the proxy docs; finishReason 'MAX_TOKENS' was never captured live.",
+  "candidates": [
+    {
+      "content": {
+        "parts": [
+          {
+            "text": "Once upon a time, in a land far"
+          }
+        ],
+        "role": "model"
+      },
+      "finishReason": "MAX_TOKENS",
+      "index": 0
+    }
+  ],
+  "modelVersion": "gemini-3.8-flash",
+  "usageMetadata": {
+    "candidatesTokenCount": 8,
+    "promptTokenCount": 190,
+    "totalTokenCount": 198
+  }
+}

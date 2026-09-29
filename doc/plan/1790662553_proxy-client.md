@@ -174,7 +174,7 @@ On failure it raises one of the errors below. It never returns half a result.
     - `parse_error_message` reads the real 401 body.
   - Commit: `feat: add Anthropic messages adapter`
 
-- [ ] **4. Google generateContent adapter**
+- [x] **4. Google generateContent adapter**
   - Files: `proxy/adapters/google.py`, `proxy/tests/fixtures/google_multiturn.json`, `synthetic_google_max_tokens.json`, `synthetic_google_blocked_prompt.json`, `synthetic_google_thought_part.json`, `proxy/tests/test_google.py`.
   - Tests:
     - `build_request`:
