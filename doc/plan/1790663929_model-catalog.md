@@ -72,7 +72,8 @@ Branch: `feat/model-catalog`, made from `main`.
   - Check: `makemigrations --check --dry-run` reports no changes after the migration is made.
   - Commit: `feat: add LLMModel catalog model and admin`
 
-- [ ] **2. Seed the three proxy models**
+- [x] **2. Seed the three proxy models**
+  - Change during execution: the seed uses `get_or_create`, not `update_or_create`. If it ever runs again, it will not undo a name or on/off change made in the admin. A test checks this.
   - Files: `catalog/migrations/0002_seed_proxy_models.py` (hand-written `RunPython`, with a reverse that does nothing), `catalog/tests.py`.
   - Tests:
     - After migrations, the three seed rows exist with the provider, tier, display name, and active flag from the table above.

@@ -1,3 +1,6 @@
+import importlib
+
+from django.apps import apps as django_apps
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import IntegrityError
@@ -81,3 +84,32 @@ class LLMModelAdminTests(TestCase):
         self.assertNotContains(response, 'delete_selected')
         response = self.client.get(f'/admin/catalog/llmmodel/{self.model.pk}/change/')
         self.assertNotContains(response, 'deletelink')
+
+
+class SeedTests(TestCase):
+    SEED = {
+        'gemini-3.8-flash': ('Gemini 3.8 Flash', Provider.GOOGLE, Tier.VALUE),
+        'claude-haiku-4-5-20251001': ('Claude Haiku 4.5', Provider.ANTHROPIC, Tier.STANDARD),
+        'gpt-5.6-luna': ('GPT-5.6 Luna', Provider.OPENAI, Tier.PREMIUM),
+    }
+
+    def seed_rows(self):
+        return LLMModel.objects.filter(proxy_model_id__in=self.SEED)
+
+    def test_seed_rows_exist_after_migrations(self):
+        self.assertEqual(self.seed_rows().count(), 3)
+        for row in self.seed_rows():
+            with self.subTest(row.proxy_model_id):
+                self.assertEqual((row.display_name, row.provider, row.tier), self.SEED[row.proxy_model_id])
+                self.assertTrue(row.is_active)
+
+    def test_seeding_again_changes_nothing(self):
+        seed = importlib.import_module('catalog.migrations.0002_seed_proxy_models')
+        LLMModel.objects.filter(proxy_model_id='gpt-5.6-luna').update(
+            display_name='Renamed by admin', is_active=False
+        )
+        seed.seed_models(django_apps, None)
+        self.assertEqual(self.seed_rows().count(), 3)
+        row = LLMModel.objects.get(proxy_model_id='gpt-5.6-luna')
+        self.assertEqual(row.display_name, 'Renamed by admin')
+        self.assertFalse(row.is_active)
