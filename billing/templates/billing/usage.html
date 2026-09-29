@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load billing %}
+
+{% block title %}Usage{% endblock %}
+{% block body_class %}wide-page{% endblock %}
+
+{% block content %}
+  <h1>Usage</h1>
+
+  <h2>Your billing accounts</h2>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th scope="col">Account</th>
+        <th scope="col" class="num">Balance (credits)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for account in accounts %}
+        <tr>
+          <td>{{ account }}</td>
+          <td class="num">{{ account.balance|credits }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="helptext">
+    Sending stops when an account's balance is 0 or less.
+    A reply's cost is known only after it arrives, so one reply can take the balance below 0.
+    Then sending stops until an admin adds credits.
+    A shared account's balance also includes other members' use.
+  </p>
+
+  <h2>Your charges</h2>
+  {% if page.object_list %}
+    <div class="table-scroll">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Chat</th>
+            <th scope="col">Model</th>
+            <th scope="col">Account</th>
+            <th scope="col" class="num">Tokens (in / out)</th>
+            <th scope="col" class="num">Price per 1K</th>
+            <th scope="col" class="num">Cost (credits)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for charge in page.object_list %}
+            {% with message=charge.chat_message %}
+            <tr>
+              <td>{{ charge.created_at|date:"Y-m-d H:i" }}</td>
+              <td>{% if message %}<a href="{% url 'chat_session' message.session.pk %}">{{ message.session.title }}</a>{% else %}—{% endif %}</td>
+              <td>{% if message %}{{ message.session.llm_model.display_name }}{% else %}—{% endif %}</td>
+              <td>{{ charge.account }}</td>
+              <td class="num">{% if message %}{{ message.input_tokens|thousands }} / {{ message.output_tokens|thousands }}{% else %}{{ charge.tokens|thousands }}{% endif %}</td>
+              <td class="num">{{ charge.price_per_1k_tokens|price }}</td>
+              <td class="num">{{ charge.amount_micro|negate|credits }}</td>
+            </tr>
+            {% endwith %}
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if page.has_other_pages %}
+      <nav class="pager" aria-label="Pages">
+        {% if page.has_previous %}<a href="?page={{ page.previous_page_number }}">Newer</a>{% endif %}
+        <span>Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+        {% if page.has_next %}<a href="?page={{ page.next_page_number }}">Older</a>{% endif %}
+      </nav>
+    {% endif %}
+  {% else %}
+    <p class="empty">No charges yet.</p>
+  {% endif %}
+{% endblock %}

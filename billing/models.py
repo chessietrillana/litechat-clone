@@ -81,19 +81,37 @@ class LedgerEntry(models.Model):
     class Kind(models.TextChoices):
         SIGNUP_GRANT = 'signup_grant', 'Sign-up grant'
         ADMIN_GRANT = 'admin_grant', 'Admin grant'
+        CHARGE = 'charge', 'Charge'
 
     account = models.ForeignKey(BillingAccount, on_delete=models.PROTECT, related_name='entries')
     amount_micro = models.BigIntegerField(help_text='Micro-credits. Positive adds credits.')
     kind = models.CharField(max_length=20, choices=Kind.choices)
     note = models.CharField(max_length=200, blank=True)
+    # Grants: the admin who gave them. Charges: the user who sent the message.
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT, related_name='+',
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    # Charges only: what was billed, at which price (study NOTE Q10).
+    tokens = models.PositiveIntegerField(null=True, blank=True, help_text='Charges only. Input + output tokens.')
+    price_per_1k_tokens = models.DecimalField(
+        'price per 1K tokens (credits)', max_digits=12, decimal_places=3, null=True, blank=True,
+        help_text='Charges only. The tier price when the message was sent.',
+    )
 
     class Meta:
         ordering = ['-created_at', '-id']
         verbose_name_plural = 'ledger entries'
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    Q(kind='charge', tokens__isnull=False, price_per_1k_tokens__isnull=False,
+                      amount_micro__lte=0)
+                    | (~Q(kind='charge') & Q(tokens__isnull=True, price_per_1k_tokens__isnull=True))
+                ),
+                name='ledger_entry_charge_fields',
+            ),
+        ]
 
     def __str__(self):
         return f'{self.get_kind_display()} {format_credits(self.amount_micro)} credits to {self.account}'
@@ -131,3 +149,7 @@ class TierPrice(models.Model):
     def micro_per_token(self):
         """Exact µc per token: credits per 1K x 1,000,000 µc / 1,000 tokens."""
         return int(Decimal(self.price_per_1k_tokens).scaleb(3))
+
+    def cost_micro(self, tokens):
+        """Exact cost of `tokens` in µc."""
+        return tokens * self.micro_per_token

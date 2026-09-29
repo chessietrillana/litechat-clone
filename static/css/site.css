@@ -75,6 +75,13 @@ button, .button {
 .data-table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #d0d7de; }
 .data-table th, .data-table td { padding: 0.5rem 0.75rem; text-align: left; border-bottom: 1px solid #d0d7de; }
 .data-table th { background: #f6f8fa; font-weight: 600; }
+.data-table .num { text-align: right; white-space: nowrap; }
+.table-scroll { overflow-x: auto; }
+
+/* Pages with wide tables (Usage) get a wider main column. */
+.wide-page .site-main { max-width: 64rem; }
+
+.pager { display: flex; gap: 1rem; align-items: center; margin-top: 0.75rem; }
 .empty { color: #59636e; }
 
 .visually-hidden {
@@ -169,6 +176,11 @@ body.chat-page {
 
 .chat-error { margin: 0 0 0.5rem; padding: 0.5rem 0.75rem; color: #a40e26; background: #ffebe9; border-radius: 4px; }
 
+/* Shown in place of the input box when the account has no credits left. */
+.chat-blocked { background: #fff8c5; }
+.chat-blocked p { margin: 0 0 0.4rem; }
+.chat-hint { margin: 0.25rem 0 0; font-size: 0.75rem; color: #59636e; }
+
 /* Narrow screens: the sidebar sits above the chat. */
 @media (max-width: 700px) {
   body.chat-page { height: auto; }
@@ -204,6 +216,7 @@ body.chat-page {
   border-bottom-left-radius: 4px;
 }
 .bubble-text { white-space: pre-wrap; overflow-wrap: anywhere; }
+.bubble-usage { margin: 0.4rem 0 0; font-size: 0.75rem; color: #59636e; }
 .bubble-note { margin: 0.4rem 0 0; font-size: 0.8rem; color: #9a6700; }
 
 /* Set by static/js/chat.js while a reply is on its way. */

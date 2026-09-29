@@ -47,8 +47,20 @@ class ChatSession(models.Model):
         return self.title
 
     def history(self):
-        """All messages as proxy Messages, oldest first."""
-        return [Message(m.role, m.content) for m in self.messages.all()]
+        """All messages as proxy Messages, oldest first.
+
+        A turn whose reply is empty is left out, both its question and its
+        reply: the proxy refuses empty messages, and the history must keep
+        going user, assistant, user, assistant.
+        """
+        history = []
+        for m in self.messages.all():
+            if m.is_empty_reply:
+                if history and history[-1].role == ChatMessage.Role.USER:
+                    history.pop()
+                continue
+            history.append(Message(m.role, m.content))
+        return history
 
 
 class ChatMessage(models.Model):
@@ -65,6 +77,12 @@ class ChatMessage(models.Model):
     cached_tokens = models.PositiveIntegerField(null=True, blank=True)
     finish_reason = models.CharField(max_length=20, blank=True)
     response_id = models.CharField(max_length=200, blank=True)
+    # Assistant replies only. Empty when nothing was charged (no usage reported).
+    # Protected: a charge is never deleted, and deleting a message keeps it.
+    charge = models.OneToOneField(
+        'billing.LedgerEntry', null=True, blank=True, on_delete=models.PROTECT,
+        related_name='chat_message',
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -76,3 +94,13 @@ class ChatMessage(models.Model):
     @property
     def was_cut_off(self):
         return self.finish_reason == 'length'
+
+    @property
+    def is_empty_reply(self):
+        """An empty reply is saved only when it was charged (it reported usage)."""
+        return self.role == self.Role.ASSISTANT and not self.content.strip()
+
+    @property
+    def cost_micro(self):
+        """What this reply cost in µc (a positive number), or None if not charged."""
+        return -self.charge.amount_micro if self.charge_id else None

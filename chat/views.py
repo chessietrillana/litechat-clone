@@ -1,10 +1,11 @@
 from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods, require_POST, require_safe
 
 from chat.forms import MessageForm, NewChatForm
 from chat.models import ChatSession
-from chat.services import ChatError, send_turn, start_session
+from chat.services import NO_CREDITS, ChatError, send_turn, start_session
 from proxy.errors import ProxyError
 
 
@@ -65,9 +66,18 @@ def session_detail(request, pk):
                 return redirect('chat_session', session.pk)
     else:
         form = MessageForm()
+    balance = session.billing_account.balance_micro()
+    out_of_credits = balance <= 0
+    if out_of_credits and error == NO_CREDITS:
+        error = None  # The page already says so in place of the input box.
+    totals = session.messages.aggregate(tokens=Sum('charge__tokens'), cost=Sum('charge__amount_micro'))
     return render_chat(request, 'chat/session.html', {
         'current_session': session,
-        'chat_messages': session.messages.all(),
+        'chat_messages': session.messages.select_related('charge'),
+        'total_tokens': totals['tokens'] or 0,
+        'total_cost': -(totals['cost'] or 0),
         'form': form,
         'error': error,
+        'balance': balance,
+        'out_of_credits': out_of_credits,
     })

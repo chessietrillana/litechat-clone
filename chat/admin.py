@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from billing.units import format_credits
 from chat.models import ChatMessage, ChatSession
 
 
@@ -7,11 +8,18 @@ class ChatMessageInline(admin.TabularInline):
     model = ChatMessage
     fields = [
         'created_at', 'role', 'content', 'input_tokens', 'output_tokens', 'cached_tokens',
-        'finish_reason', 'response_id',
+        'cost', 'finish_reason', 'response_id',
     ]
     readonly_fields = fields
     extra = 0
     can_delete = False
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('charge')
+
+    @admin.display(description='Cost (credits)')
+    def cost(self, message):
+        return '' if message.cost_micro is None else format_credits(message.cost_micro)
 
     def has_add_permission(self, request, obj=None):
         return False

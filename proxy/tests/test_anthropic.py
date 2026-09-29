@@ -48,6 +48,26 @@ class ParseResponseTests(SimpleTestCase):
         result = anthropic.parse_response(load_fixture('synthetic_anthropic_thinking_block.json'))
         self.assertEqual(result.text, 'Hello! How can I help you today?')
         self.assertEqual(result.cached_tokens, 128)
+        self.assertEqual(result.input_tokens, 183 + 128)
+
+    def test_cache_reads_and_writes_count_as_input(self):
+        result = anthropic.parse_response(load_fixture('synthetic_anthropic_cache_tokens.json'))
+        self.assertEqual(result.input_tokens, 278)  # 100 + 128 read + 50 written
+        self.assertEqual(result.output_tokens, 12)
+        self.assertEqual(result.cached_tokens, 128)
+
+    def test_cache_counts_alone_are_still_usage(self):
+        data = load_fixture('synthetic_anthropic_cache_tokens.json')
+        del data['usage']['input_tokens']
+        self.assertEqual(anthropic.parse_response(data).input_tokens, 178)
+
+    def test_missing_cache_counts_are_zero(self):
+        data = load_fixture('synthetic_anthropic_cache_tokens.json')
+        del data['usage']['cache_read_input_tokens']
+        del data['usage']['cache_creation_input_tokens']
+        result = anthropic.parse_response(data)
+        self.assertEqual(result.input_tokens, 100)
+        self.assertIsNone(result.cached_tokens)
 
     def test_missing_usage_gives_none(self):
         data = load_fixture('anthropic_single.json')

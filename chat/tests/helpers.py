@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 
-from billing.models import BillingAccount
+from billing.models import BillingAccount, LedgerEntry
 from catalog.models import LLMModel
 from chat.models import ChatMessage, ChatSession
 from proxy.types import ChatResult
@@ -15,6 +15,14 @@ def make_user(username):
 
 def personal_account(user):
     return BillingAccount.objects.get(kind=BillingAccount.Kind.PERSONAL, owner=user)
+
+
+def set_balance(account, micro):
+    """Add one adjustment entry so the balance is exactly `micro` µc."""
+    LedgerEntry.objects.create(
+        account=account, amount_micro=micro - account.balance_micro(),
+        kind=LedgerEntry.Kind.ADMIN_GRANT, note='test adjustment',
+    )
 
 
 def seeded_model(proxy_model_id='gemini-3.8-flash'):

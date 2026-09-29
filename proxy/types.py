@@ -19,6 +19,7 @@ class Message:
 @dataclass(frozen=True)
 class ChatResult:
     text: str
+    # All input tokens, cached ones included, on every interface. This is what is billed.
     input_tokens: int | None
     output_tokens: int | None
     cached_tokens: int | None
