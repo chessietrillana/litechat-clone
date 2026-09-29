@@ -49,6 +49,11 @@ People never see µc:
   - A personal account has an owner, and a shared one has none.
   - A user has at most one personal account.
 
+- **Deleting a user is blocked when their personal account has ledger entries** (human's review):
+  - `BillingAccount.owner` cascades, and `LedgerEntry.account` is protected. So deleting the user tries to delete their personal account, the account's entries block it, and Django raises `ProtectedError`. Nothing is deleted.
+  - Every user gets a sign-up grant entry, so in practice **no user can be deleted**. To lock someone out, untick **Active** on the user in the admin.
+  - `LedgerEntry.created_by` (the granting admin) is also protected, so the grant history stays complete.
+  - Tested in step 3.
 - **Who can bill to what (NOTE Q18):**
   - `BillingAccount.objects.for_user(user)` returns the user's personal account plus every shared account they are a member of.
   - Chat (plan 6) will use this for the account picker.
@@ -105,7 +110,8 @@ People never see µc:
 
 ## Steps
 
-- [ ] **1. Billing app: accounts, ledger, units**
+- [x] **1. Billing app: accounts, ledger, units**
+  - Also added a database rule that a shared account needs a name. `with_balance()` uses a subquery, so filtering by members can't count an entry twice. A test covers this.
   - Files:
     - `billing/` (new app, `venv/bin/python manage.py startapp billing`). Add `"billing"` to `INSTALLED_APPS`.
     - `billing/units.py`:
@@ -164,6 +170,7 @@ People never see µc:
     - `create_superuser` does the same.
     - Saving an existing user again does not add a second account or grant.
     - With `override_settings(BILLING_SIGNUP_GRANT_CREDITS=5)`, a new user gets 5 credits.
+    - Deleting a user whose personal account has ledger entries raises `ProtectedError`. The user, the account, and the entries all still exist afterwards.
     - The backfill function:
       - gives a user without an account one account and 1,000 credits
       - leaves a user who already has one unchanged
