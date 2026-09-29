@@ -94,12 +94,19 @@ Branch: `feat/chat-sessions`. The plan file is committed on this branch, as aske
   - `templates/chat/layout.html` has the sidebar on the left (16rem) and the chat on the right. The messages scroll. The input box stays at the bottom.
   - Bubbles: user messages on the right, blue. Replies on the left, white with a border.
   - Under 700px wide, the sidebar sits above the chat.
-  - Plain CSS in `static/css/site.css`. No framework, **no JavaScript**.
-- **Known limits (no JavaScript):**
-  - The page waits for the reply, up to 30 seconds, with no "typing" sign.
+  - Plain CSS in `static/css/site.css`. No framework.
+- **A small plain-JS file, `static/js/chat.js`** (human's review). No framework. It runs on the new chat form and the session send form:
+  - Once a message is submitted, the **Send** button is disabled and shows "Waiting for reply…". So a double click can't send twice.
+  - Enter sends. Shift+Enter adds a new line.
+  - Enter does nothing while the box is blank or a send is in progress.
+  - Enter while typing with an input method (e.g. Japanese, `isComposing`) does not send.
+  - The script is loaded with `defer` and only on chat pages.
+- **Without JavaScript the pages still work:** the forms are normal POST forms. Only these limits come back:
+  - The page waits for the reply, up to 30 seconds, with no sign of progress.
   - Enter does not send. The user clicks **Send**.
-  - Clicking **Send** twice fast can send two turns. Rare, and fixed later if it matters.
-  - These go in a footgun doc and in TODO.
+  - Clicking **Send** twice fast can send two turns.
+  - These go in the footgun doc.
+- **Even with JavaScript:** the browser still waits up to 30 seconds for the reply. The button text is the only sign of progress. Sending from two tabs at once is not blocked.
 - **Admin:** a view-only **Chat sessions** page with the messages inline. No add, change, or delete. It helps check that turns and token counts are saved.
 - **Logging:** add a `LOGGING` setting so the `proxy` INFO lines show in the runserver terminal (TODO "Later"). The lines hold no message text and no keys.
 
@@ -111,7 +118,7 @@ Branch: `feat/chat-sessions`. The plan file is committed on this branch, as aske
     - `chat/models.py`: `ChatSession`, `ChatMessage`, and `make_title(text)`.
     - `chat/migrations/0001_initial.py` (from `makemigrations`).
     - `chat/admin.py`: view-only `ChatSessionAdmin` with a messages inline.
-    - `chat/tests/` package with `test_models.py`. Remove the generated `chat/tests.py` stub, as for `proxy` and `billing`. **This deletes a generated empty file. Please confirm.**
+    - `chat/tests/` package with `test_models.py`. Remove the generated `chat/tests.py` stub, as for `proxy` and `billing`. The human confirmed this deletion.
   - Tests:
     - `make_title`:
       - "What is the capital of France?" → "What is the capital of France?"
@@ -150,9 +157,9 @@ Branch: `feat/chat-sessions`. The plan file is committed on this branch, as aske
     - `templates/base.html`: add `{% block main %}` around the current main column.
     - `templates/chat/layout.html` (new): sidebar with **New chat** and the session list (current one highlighted), and the chat area.
     - `templates/chat/new.html` (new): "Hello, <username>.", and the form: model (name, provider, tier), billing account (with balance), and message.
-    - `templates/home.html`: removed. Its content moves into `chat/new.html`. **This deletes a file. Please confirm.**
+    - `templates/home.html`: removed. Its content moves into `chat/new.html`. The human confirmed this deletion.
     - `chat/forms.py`: `NewChatForm` (model and account choices limited to active models and `for_user`).
-    - `chat/views.py`: `home` (GET the form) and `new_chat` (POST). `config/views.py` is removed and `/` points to `chat.views.home`. **This deletes a file. Please confirm.**
+    - `chat/views.py`: `home` (GET the form) and `new_chat` (POST). `config/views.py` is removed and `/` points to `chat.views.home`. The human confirmed this deletion.
     - `chat/urls.py`, `config/urls.py`.
     - `static/css/site.css`: layout, sidebar, form at the bottom.
     - `config/tests.py`: move the home tests to `chat/tests/test_views.py` and keep what they check.
@@ -185,15 +192,31 @@ Branch: `feat/chat-sessions`. The plan file is committed on this branch, as aske
     - The model and account shown can't be changed: the page has no picker for them.
   - Commit: `feat: add chat session page with message bubbles`
 
-- [ ] **5. Show proxy log lines in the terminal**
+- [ ] **5. Send button script: no double send, Enter to send**
+  - Files:
+    - `static/js/chat.js` (new): plain JS, as described in the decisions.
+    - `templates/chat/layout.html`: load it with `<script defer>`.
+    - `templates/chat/new.html`, `templates/chat/session.html`: mark the send forms with `data-chat-form`, and give the button its waiting text in `data-waiting-text`.
+    - `chat/tests/test_views.py`.
+  - Tests:
+    - Django tests can't run JavaScript. They check the wiring:
+      - Both chat pages load `js/chat.js`, and the login page does not.
+      - Both send forms have `data-chat-form`, a normal `method="post"` and `action`, and a real submit button. So the page works without JS.
+      - The static file is found (`finders.find('js/chat.js')`).
+    - The JS itself is checked by the human at rendezvous (steps below).
+  - Commit: `feat: disable Send while waiting and send on Enter`
+
+- [ ] **6. Show proxy log lines in the terminal**
   - Files: `config/settings.py` (`LOGGING`: the `proxy` logger at INFO to the console), `doc/wiki/footguns/proxy-logs-not-shown.md` (say it's fixed).
   - Tests: a test with `assertLogs('proxy', 'INFO')` still passes. A test checks that the `proxy` logger's level is INFO.
   - Commit: `feat: show proxy log lines in the console`
 
-- [ ] **6. Record footguns**
+- [ ] **7. Record footguns**
   - Files: `doc/wiki/footguns/chat-waits-for-the-reply.md` (new):
-    - The page waits up to 30 seconds with no sign of progress.
-    - A double click on **Send** can send two turns.
+    - The browser waits up to 30 seconds for each reply. With JS, the button says "Waiting for reply…". That is the only sign of progress.
+    - Without JS: no progress sign, Enter does not send, and a double click on **Send** can send two turns.
+    - Sending from two tabs at once is not blocked, even with JS.
+    - After the browser's **Back** button, the Send button could still be disabled. The script re-enables it when the page is shown again (`pageshow`).
     - A failed turn saves nothing, on purpose. The text stays in the box.
     - Sessions sort by last activity, not by start time.
   - Commit: `docs: record chat session footguns`
@@ -213,7 +236,9 @@ Start the server in your own terminal: `venv/bin/python manage.py runserver`. Th
 1. Log in as `alice`. You see the chat layout: an empty sidebar with **New chat**, and "Hello, alice." with the new chat form.
 2. The model picker lists the 3 models. The account picker shows **alice (personal) · 1,000 credits** and **Study group · 500 credits**.
 3. Pick **Gemini 3.8 Flash** and **alice (personal)**. Type `What is the capital of France? Answer in one sentence.` Click **Send**. After a few seconds you are on the session page. Your message is a bubble on the right, and the reply is on the left. The sidebar shows the title "What is the capital of France?…".
-4. Type `And of Italy?` and click **Send**. The reply should talk about Rome. This shows the full history was sent.
+4. Type `And of Italy?` and press **Enter**. The Send button turns grey and says "Waiting for reply…" until the page reloads. The reply should talk about Rome. This shows the full history was sent.
+   - Before sending, press **Shift+Enter** in the box. It adds a new line and does not send.
+   - Double-click **Send** on the next message. Only one turn is added.
 5. Click **New chat**. Start a second chat with **GPT-5.6 Luna** and **Study group**. It appears at the top of the sidebar.
 6. Click the first chat in the sidebar. It opens with all its messages. Send one more message. It moves to the top of the sidebar.
 7. Watch the runserver terminal. Each turn prints a `proxy call ok` line with token counts, and no message text.
@@ -221,3 +246,4 @@ Start the server in your own terminal: `venv/bin/python manage.py runserver`. Th
 9. Log in as `bob`. Their sidebar is empty. Open alice's chat URL (e.g. `/chat/1/`). You get "Not found".
 10. In the admin, open **Chat sessions**. You see alice's two chats, with messages and token counts.
 11. Make the window narrow. The sidebar moves above the chat.
+12. Optional: turn off JavaScript in the browser and send a message. It still works: you click **Send** and the page waits for the reply.
