@@ -42,4 +42,4 @@ Nothing. Every open question in the study has an answer (section 14).
 - [x] Human: confirm the chat-sessions browser check. Confirmed 2026-09-29: steps 1–12 passed, including the Send-button script and the no-JavaScript check.
 - [x] Human: confirm the metering browser check. Confirmed 2026-09-29: all 9 steps passed (charges, Usage page, price change keeps old prices, blocking at 0, grant unblocks).
 - [x] Human: confirm the sidebar browser check. Confirmed 2026-09-29: all 10 steps passed (rename, blank refused, keeps its place, cancel, delete, 404, Usage "(deleted)", admin filter, other user gets 404).
-- [ ] Human: run `venv/bin/python manage.py proxy_smoke` in your own terminal and confirm all three interfaces answer.
+- [x] Human: run `venv/bin/python manage.py proxy_smoke` in your own terminal and confirm all three interfaces answer.
