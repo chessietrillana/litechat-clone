@@ -157,7 +157,7 @@ On failure it raises one of the errors below. It never returns half a result.
     - `parse_error_message` reads the real 401 body from the study.
   - Commit: `feat: add OpenAI chat completions adapter`
 
-- [ ] **3. Anthropic Messages adapter**
+- [x] **3. Anthropic Messages adapter**
   - Files: `proxy/adapters/anthropic.py`, `proxy/tests/fixtures/anthropic_single.json`, `anthropic_multiturn.json`, `synthetic_anthropic_max_tokens.json`, `synthetic_anthropic_thinking_block.json`, `proxy/tests/test_anthropic.py`.
   - Tests:
     - `build_request`:
