@@ -52,7 +52,7 @@ Branch: `feat/model-catalog`, made from `main`.
 
 ## Steps
 
-- [ ] **1. `LLMModel` model and admin**
+- [x] **1. `LLMModel` model and admin**
   - Files:
     - `catalog/` (new app, `venv/bin/python manage.py startapp catalog`). Add `"catalog"` to `INSTALLED_APPS`.
     - `catalog/models.py`: `Provider` (TextChoices), `Tier` (IntegerChoices), `LLMModelQuerySet.active()`, `LLMModel`, with `__str__` returning the display name.
@@ -72,7 +72,8 @@ Branch: `feat/model-catalog`, made from `main`.
   - Check: `makemigrations --check --dry-run` reports no changes after the migration is made.
   - Commit: `feat: add LLMModel catalog model and admin`
 
-- [ ] **2. Seed the three proxy models**
+- [x] **2. Seed the three proxy models**
+  - Change during execution: the seed uses `get_or_create`, not `update_or_create`. If it ever runs again, it will not undo a name or on/off change made in the admin. A test checks this.
   - Files: `catalog/migrations/0002_seed_proxy_models.py` (hand-written `RunPython`, with a reverse that does nothing), `catalog/tests.py`.
   - Tests:
     - After migrations, the three seed rows exist with the provider, tier, display name, and active flag from the table above.
@@ -80,7 +81,7 @@ Branch: `feat/model-catalog`, made from `main`.
   - Check: `venv/bin/python manage.py migrate` applies it to your dev database. `showmigrations catalog` shows both migrations applied.
   - Commit: `feat: seed catalog with the three proxy models`
 
-- [ ] **3. Models page**
+- [x] **3. Models page**
   - Files:
     - `catalog/views.py`: `model_list`, with `@login_required`.
     - `catalog/urls.py`: `path("", model_list, name="models")`.

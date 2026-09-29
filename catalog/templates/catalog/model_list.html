@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Models{% endblock %}
+
+{% block content %}
+  <h1>Models</h1>
+  {% if models %}
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">Model</th>
+          <th scope="col">Provider</th>
+          <th scope="col">Tier</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for model in models %}
+          <tr>
+            <td>{{ model.display_name }}</td>
+            <td>{{ model.get_provider_display }}</td>
+            <td class="tier tier-{{ model.get_tier_display|lower }}">{{ model.get_tier_display }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <p class="empty">No models are available right now.</p>
+  {% endif %}
+{% endblock %}
