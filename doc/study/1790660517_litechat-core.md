@@ -298,3 +298,11 @@ NOTE: Q24: Max reply length is 1024 tokens (PROXY_DEFAULT_MAX_TOKENS).
 NOTE: Q25: Thinking/reasoning is off.
 
 NOTE: Q26: No system prompt for now.
+
+NOTE: Q1: List only the 3 proxy models.
+
+NOTE: Q2: gemini-3.8-flash = Value, claude-haiku-4-5 = Standard, gpt-5.6-luna = Premium.
+
+NOTE: Q3: Show the models as the providers name them.
+
+NOTE: Q4: Yes, admins can turn models on and off.
