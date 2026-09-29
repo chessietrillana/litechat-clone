@@ -11,7 +11,7 @@ from billing.units import format_credits
 class LedgerEntryInline(admin.TabularInline):
     """Read-only list of an account's entries. Grants are added on their own page."""
     model = LedgerEntry
-    fields = ['created_at', 'kind', 'amount', 'note', 'created_by']
+    fields = ['created_at', 'kind', 'amount', 'tokens', 'price_per_1k_tokens', 'note', 'created_by']
     readonly_fields = fields
     extra = 0
     can_delete = False
@@ -73,11 +73,18 @@ class BillingAccountAdmin(admin.ModelAdmin):
 
 @admin.register(LedgerEntry)
 class LedgerEntryAdmin(admin.ModelAdmin):
-    """'Add' is the grant-credits form. Entries are never changed or deleted."""
-    list_display = ['created_at', 'account', 'kind', 'amount', 'note', 'created_by']
+    """'Add' is the grant-credits form. Charges come from chats.
+
+    Entries are never changed or deleted.
+    """
+    list_display = [
+        'created_at', 'account', 'kind', 'amount', 'tokens', 'price_per_1k_tokens', 'note', 'created_by',
+    ]
     list_filter = ['kind', 'account']
     list_select_related = ['account__owner', 'created_by']
-    readonly_fields = ['account', 'kind', 'amount', 'note', 'created_by', 'created_at']
+    readonly_fields = [
+        'account', 'kind', 'amount', 'tokens', 'price_per_1k_tokens', 'note', 'created_by', 'created_at',
+    ]
 
     def get_form(self, request, obj=None, **kwargs):
         if obj is None:
