@@ -203,7 +203,8 @@ Branch: `feat/chat-sessions`. The plan file is committed on this branch, as aske
     - The model and account shown can't be changed: the page has no picker for them.
   - Commit: `feat: add chat session page with message bubbles`
 
-- [ ] **5. Send button script: no double send, Enter to send**
+- [x] **5. Send button script: no double send, Enter to send**
+  - Also: a grey `button:disabled` style. `node --check` found no syntax errors in the script (Node was already on this machine; it is not a project dependency). The script was not run in a browser here. That is rendezvous step 4.
   - Files:
     - `static/js/chat.js` (new): plain JS, as described in the decisions.
     - `templates/chat/layout.html`: load it with `<script defer>`.

@@ -9,7 +9,7 @@
       They can't be changed later. <a href="{% url 'models' %}">About the models</a></p>
   </div>
 
-  <form method="post" action="{% url 'chat_new' %}" class="chat-input new-chat-form">
+  <form method="post" action="{% url 'chat_new' %}" class="chat-input new-chat-form" data-chat-form>
     {% csrf_token %}
     {% if error %}<p class="chat-error" role="alert">{{ error }}</p>{% endif %}
     {{ form.non_field_errors }}
@@ -29,7 +29,7 @@
     <div class="chat-compose">
       <label for="{{ form.message.id_for_label }}" class="visually-hidden">Message</label>
       {{ form.message }}
-      <button type="submit">Send</button>
+      <button type="submit" data-waiting-text="Waiting for reply…">Send</button>
     </div>
   </form>
 {% endblock %}

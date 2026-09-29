@@ -247,3 +247,39 @@ class SessionPageTests(TestCase):
         send_chat.return_value = reply(text='line one\nline two')
         self.client.post(self.url, {'message': 'question 3'})
         self.assertContains(self.client.get(self.url), 'line one\nline two')
+
+
+class SendScriptWiringTests(TestCase):
+    """Django tests can't run JavaScript. These check the wiring. The human checks the rest."""
+
+    def setUp(self):
+        self.alice = make_user('alice')
+        self.session = make_session(self.alice, turns=1)
+        self.client.force_login(self.alice)
+
+    def assert_send_form_is_wired(self, response, action):
+        self.assertContains(response, '<script defer src="/static/js/chat.js"></script>', html=True)
+        # A normal POST form with a real submit button, so it works without JS.
+        self.assertContains(response, f'method="post" action="{action}"')
+        self.assertContains(response, 'data-chat-form')
+        self.assertContains(
+            response,
+            '<button type="submit" data-waiting-text="Waiting for reply…">Send</button>',
+            html=True,
+        )
+
+    def test_new_chat_page_is_wired(self):
+        self.assert_send_form_is_wired(self.client.get('/'), '/chat/new/')
+
+    def test_session_page_is_wired(self):
+        url = f'/chat/{self.session.pk}/'
+        self.assert_send_form_is_wired(self.client.get(url), url)
+
+    def test_other_pages_do_not_load_the_script(self):
+        self.assertNotContains(self.client.get('/models/'), 'chat.js')
+        self.client.logout()
+        self.assertNotContains(self.client.get('/accounts/login/'), 'chat.js')
+
+    def test_static_file_is_found(self):
+        from django.contrib.staticfiles import finders
+        self.assertIsNotNone(finders.find('js/chat.js'))

@@ -205,3 +205,6 @@ body.chat-page {
 }
 .bubble-text { white-space: pre-wrap; overflow-wrap: anywhere; }
 .bubble-note { margin: 0.4rem 0 0; font-size: 0.8rem; color: #9a6700; }
+
+/* Set by static/js/chat.js while a reply is on its way. */
+button:disabled { color: #59636e; background: #eaeef2; border-color: #d0d7de; cursor: wait; }
