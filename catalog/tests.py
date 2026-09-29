@@ -113,3 +113,54 @@ class SeedTests(TestCase):
         row = LLMModel.objects.get(proxy_model_id='gpt-5.6-luna')
         self.assertEqual(row.display_name, 'Renamed by admin')
         self.assertFalse(row.is_active)
+
+
+class ModelsPageTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('alice', password='correct-horse-42')
+
+    def get_page(self):
+        self.client.force_login(self.user)
+        return self.client.get('/models/')
+
+    def test_visitor_is_sent_to_login(self):
+        response = self.client.get('/models/')
+        self.assertRedirects(response, '/accounts/login/?next=/models/')
+
+    def test_shows_seed_models_with_provider_and_tier_in_tier_order(self):
+        response = self.get_page()
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, '<td>Gemini 3.8 Flash</td>', html=True)
+        self.assertContains(response, '<td>Google</td>', html=True)
+        self.assertContains(response, 'Value')
+        self.assertContains(response, '<td>Anthropic</td>', html=True)
+        self.assertContains(response, 'Standard')
+        self.assertContains(response, '<td>OpenAI</td>', html=True)
+        self.assertContains(response, 'Premium')
+        html = response.content.decode()
+        positions = [html.index(name) for name in ('Gemini 3.8 Flash', 'Claude Haiku 4.5', 'GPT-5.6 Luna')]
+        self.assertEqual(positions, sorted(positions))
+
+    def test_turned_off_model_is_hidden(self):
+        LLMModel.objects.filter(proxy_model_id='gpt-5.6-luna').update(is_active=False)
+        response = self.get_page()
+        self.assertNotContains(response, 'GPT-5.6 Luna')
+        self.assertContains(response, 'Gemini 3.8 Flash')
+
+    def test_no_active_models_shows_message(self):
+        LLMModel.objects.update(is_active=False)
+        response = self.get_page()
+        self.assertContains(response, 'No models are available right now.')
+        self.assertNotContains(response, '<table')
+
+    def test_nav_link_only_when_logged_in(self):
+        response = self.get_page()
+        self.assertContains(response, '<a href="/models/">Models</a>', html=True)
+        self.client.logout()
+        response = self.client.get('/accounts/login/')
+        self.assertNotContains(response, 'href="/models/"')
+
+    def test_home_links_to_models(self):
+        self.client.force_login(self.user)
+        response = self.client.get('/')
+        self.assertContains(response, 'href="/models/"')

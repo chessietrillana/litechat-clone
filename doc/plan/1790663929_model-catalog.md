@@ -81,7 +81,7 @@ Branch: `feat/model-catalog`, made from `main`.
   - Check: `venv/bin/python manage.py migrate` applies it to your dev database. `showmigrations catalog` shows both migrations applied.
   - Commit: `feat: seed catalog with the three proxy models`
 
-- [ ] **3. Models page**
+- [x] **3. Models page**
   - Files:
     - `catalog/views.py`: `model_list`, with `@login_required`.
     - `catalog/urls.py`: `path("", model_list, name="models")`.
