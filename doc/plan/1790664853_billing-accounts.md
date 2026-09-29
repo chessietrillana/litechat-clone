@@ -182,7 +182,8 @@ People never see µc:
   - Check: `venv/bin/python manage.py migrate` backfills your dev database. alice and your admin user each get a personal account with 1,000 credits.
   - Commit: `feat: give every user a personal account with sign-up credits`
 
-- [ ] **4. Billing admin: shared accounts, members, credit grants**
+- [x] **4. Billing admin: shared accounts, members, credit grants**
+  - Also: `billing/forms.py` has `BillingAccountForm`, which makes new accounts shared and requires a name, with a clear error instead of a database error. The grant page is titled "Grant credits" and fills in the account from the link.
   - Files:
     - `billing/admin.py`:
       - `BillingAccountAdmin`: list with balance; filter; search; add = shared only; members picker only for shared; kind and owner read-only on personal accounts; read-only ledger inline; **Grant credits** link; no delete.
