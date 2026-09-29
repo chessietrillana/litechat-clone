@@ -49,6 +49,10 @@ PROXY_KEYS = {
     'anthropic': os.environ.get('PROXY_ANTHROPIC_API_KEY', ''),
     'google': os.environ.get('PROXY_GOOGLE_API_KEY', ''),
 }
+# Every proxy request uses this timeout. Never retry automatically (see doc/wiki/footguns).
+PROXY_TIMEOUT_SECONDS = 30
+# Max reply length in tokens (study NOTE Q24).
+PROXY_DEFAULT_MAX_TOKENS = 1024
 
 
 # Application definition
@@ -61,6 +65,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',
+    'proxy',
 ]
 
 MIDDLEWARE = [

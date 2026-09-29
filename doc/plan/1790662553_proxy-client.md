@@ -117,7 +117,8 @@ On failure it raises one of the errors below. It never returns half a result.
 
 ## Steps
 
-- [ ] **1. Proxy app, types, errors, and HTTP transport**
+- [x] **1. Proxy app, types, errors, and HTTP transport**
+  - Change during execution: an error status (4xx/5xx) with a body that is not JSON, such as an HTML 502 page, returns `(status, None)` instead of raising `ProxyResponseError`. That way `send_chat` still maps it by status (e.g. 502 → `ProxyUpstreamError`). Only a 2xx body that is not JSON raises `ProxyResponseError`.
   - Files:
     - `proxy/` (new app, `venv/bin/python manage.py startapp proxy`). Delete nothing, but leave `models.py`, `admin.py`, and `views.py` empty.
     - Add `"proxy"` to `INSTALLED_APPS`.
